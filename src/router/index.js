@@ -131,6 +131,16 @@ const router = createRouter({
             path: '/auth/error',
             name: 'error',
             component: () => import('@/views/pages/auth/Error.vue')
+        },
+        {
+            path: '/pages/gerenciar-usuario',
+            name: 'gerenciar-usuario',
+            component: () => import('@/views/pages/GerenciarUsuario.vue')
+        },
+        {
+            path: '/pages/cadastrar-usuario',
+            name: 'cadastrar-usuario',
+            component: () => import('@/views/pages/CadastrarUsuario.vue')
         }
     ]
 });
