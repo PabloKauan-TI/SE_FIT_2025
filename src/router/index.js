@@ -143,7 +143,7 @@ const router = createRouter({
             component: () => import('@/views/pages/CadastrarUsuario.vue')
         },
         {
-            path: '/auth/CadastroEventos',
+            path: '/pages/CadastroEventos',
             name: 'CadastroEventos',
             component: () => import('@/views/pages/CadastroEventos.vue')
         }
