@@ -146,6 +146,11 @@ const router = createRouter({
             path: '/pages/CadastroEventos',
             name: 'CadastroEventos',
             component: () => import('@/views/pages/CadastroEventos.vue')
+        },
+        {
+            path: '/pages/GerenciarEventos',
+            name: 'GerenciarEventos',
+            component: () => import('@/views/pages/GerenciarEventos.vue')
         }
     ]
 });
