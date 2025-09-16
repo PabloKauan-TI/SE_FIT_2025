@@ -1,6 +1,5 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import AppConfigurator from './AppConfigurator.vue';
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 </script>
@@ -50,10 +49,10 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
+                    <router-link to="/pages/perfil-usuario" class="layout-topbar-action">
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
-                    </button>
+                    </router-link>
                 </div>
             </div>
         </div>

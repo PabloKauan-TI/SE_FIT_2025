@@ -47,7 +47,6 @@ const fetchUsers = async () => {
 </script>
 
 <template>
-    <FloatingConfigurator />
     <AppTopbar />
     <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
         <div class="card">

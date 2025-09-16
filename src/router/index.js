@@ -151,6 +151,11 @@ const router = createRouter({
             path: '/pages/GerenciarEventos',
             name: 'GerenciarEventos',
             component: () => import('@/views/pages/GerenciarEventos.vue')
+        },
+        {
+            path: '/pages/perfil-usuario',
+            name: 'perfil-usuario',
+            component: () => import('@/views/pages/PerfilUsuario.vue')
         }
     ]
 });
