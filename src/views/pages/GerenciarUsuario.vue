@@ -94,7 +94,7 @@ const fetchUsers = async () => {
         </DataTable>
     </div>
 
-    <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="Detalhes do Usuário" :modal="true">
+    <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="Cadastro" :modal="true">
         <div class="flex flex-col gap-6">
             <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
@@ -112,6 +112,10 @@ const fetchUsers = async () => {
             <div>
                 <label for="indentifield" class="block font-bold mb-3">Identificação</label>
                 <InputText id="indentifield" v-model="user.indentifield" required="true" rows="3" cols="20" fluid />
+            </div>
+            <div>
+                <label for="senha" class="block font-bold mb-3">Senha</label>
+                <InputText id="senha" v-model="user.senha" required="true" rows="3" cols="20" fluid />
             </div>
         </div>
 
