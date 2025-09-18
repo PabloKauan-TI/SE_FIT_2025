@@ -148,116 +148,114 @@ const exportCSV = () => dt.value.exportCSV();
 </script>
 
 <template>
-    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
-        <div class="card">
-            <Toast />
+    <div class="card">
+        <Toast />
 
-            <DataTable
-                ref="dt"
-                :value="events"
-                v-model:selection="selectedEvents"
-                dataKey="id"
-                :paginator="true"
-                :rows="10"
-                :rowsPerPageOptions="[5, 10, 25]"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} eventos"
-                :loading="isLoading"
-                responsiveLayout="scroll"
-            >
-                <template #header>
-                    <div class="flex flex-wrap gap-2 items-center justify-between">
-                        <h4 class="m-0">Gerenciar Eventos</h4>
-                    </div>
+        <DataTable
+            ref="dt"
+            :value="events"
+            v-model:selection="selectedEvents"
+            dataKey="id"
+            :paginator="true"
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 25]"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} eventos"
+            :loading="isLoading"
+            responsiveLayout="scroll"
+        >
+            <template #header>
+                <div class="flex flex-wrap gap-2 items-center justify-between">
+                    <h4 class="m-0">Gerenciar Eventos</h4>
+                </div>
+            </template>
+
+            <Column selectionMode="multiple" style="width: 3rem" />
+            <Column field="name" header="Nome" sortable style="min-width: 16rem" />
+            <Column field="date" header="Data" sortable style="min-width: 12rem">
+                <template #body="slotProps">
+                    {{ formatDate(slotProps.data.date) }}
                 </template>
-
-                <Column selectionMode="multiple" style="width: 3rem" />
-                <Column field="name" header="Nome" sortable style="min-width: 16rem" />
-                <Column field="date" header="Data" sortable style="min-width: 12rem">
-                    <template #body="slotProps">
-                        {{ formatDate(slotProps.data.date) }}
-                    </template>
-                </Column>
-                <Column field="location" header="Local" sortable style="min-width: 14rem" />
-                <Column headerStyle="min-width:10rem;" bodyClass="text-center">
-                    <template #body="slotProps">
-                        <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editEvent(slotProps.data)" />
-                        <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteEvent(slotProps.data)" />
-                    </template>
-                </Column>
-            </DataTable>
-
-            <!-- Modal de Criação/Edição -->
-            <Dialog v-model:visible="eventDialog" :style="{ width: '450px' }" header="Detalhes do Evento" :modal="true" class="p-fluid">
-                <div class="field">
-                    <label for="name">Nome</label>
-                    <InputText id="name" v-model.trim="event.name" required="true" autofocus :class="{ 'p-invalid': submitted && !event.name }" />
-                    <small class="p-error" v-if="submitted && !event.name">O nome é obrigatório.</small>
-                </div>
-
-                <div class="formgrid grid">
-                    <div class="field col">
-                        <label for="date">Data</label>
-                        <InputText id="date" type="date" v-model="event.date" :class="{ 'p-invalid': submitted && !event.date }" />
-                    </div>
-                    <div class="field col">
-                        <label for="time">Horário</label>
-                        <InputText id="time" type="time" v-model="event.time" :class="{ 'p-invalid': submitted && !event.time }" />
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label for="location">Local</label>
-                    <InputText id="location" v-model="event.location" />
-                </div>
-
-                <div class="field">
-                    <label for="description">Descrição</label>
-                    <Textarea id="description" v-model="event.description" rows="3" />
-                </div>
-
-                <div class="field">
-                    <label>Imagem do Evento</label>
-                    <input
-                        type="file"
-                        @change="handleFileUpload"
-                        accept="image/*"
-                        class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                    />
-                    <img v-if="event.imagePreview" :src="event.imagePreview" class="mt-2 w-full border-round" style="max-height: 200px; object-fit: contain" />
-                </div>
-                <template #footer>
-                    <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
-                    <Button label="Salvar" icon="pi pi-check" @click="saveEvent" />
+            </Column>
+            <Column field="location" header="Local" sortable style="min-width: 14rem" />
+            <Column headerStyle="min-width:10rem;" bodyClass="text-center">
+                <template #body="slotProps">
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editEvent(slotProps.data)" />
+                    <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteEvent(slotProps.data)" />
                 </template>
-            </Dialog>
+            </Column>
+        </DataTable>
 
-            <!-- Modal de Confirmação de Deleção -->
-            <Dialog v-model:visible="deleteEventDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
-                <div class="flex items-center">
-                    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                    <span v-if="event"
-                        >Tem certeza que deseja deletar <b>{{ event.name }}</b
-                        >?</span
-                    >
-                </div>
-                <template #footer>
-                    <Button label="Não" icon="pi pi-times" text @click="deleteEventDialog = false" />
-                    <Button label="Sim" icon="pi pi-check" @click="deleteEvent" />
-                </template>
-            </Dialog>
+        <!-- Modal de Criação/Edição -->
+        <Dialog v-model:visible="eventDialog" :style="{ width: '450px' }" header="Detalhes do Evento" :modal="true" class="p-fluid">
+            <div class="field">
+                <label for="name">Nome</label>
+                <InputText id="name" v-model.trim="event.name" required="true" autofocus :class="{ 'p-invalid': submitted && !event.name }" />
+                <small class="p-error" v-if="submitted && !event.name">O nome é obrigatório.</small>
+            </div>
 
-            <!-- Modal de Confirmação de Deleção Múltipla -->
-            <Dialog v-model:visible="deleteEventsDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
-                <div class="flex items-center">
-                    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                    <span>Tem certeza que deseja deletar os eventos selecionados?</span>
+            <div class="formgrid grid">
+                <div class="field col">
+                    <label for="date">Data</label>
+                    <InputText id="date" type="date" v-model="event.date" :class="{ 'p-invalid': submitted && !event.date }" />
                 </div>
-                <template #footer>
-                    <Button label="Não" icon="pi pi-times" text @click="deleteEventsDialog = false" />
-                    <Button label="Sim" icon="pi pi-check" @click="deleteSelectedEvents" />
-                </template>
-            </Dialog>
-        </div>
+                <div class="field col">
+                    <label for="time">Horário</label>
+                    <InputText id="time" type="time" v-model="event.time" :class="{ 'p-invalid': submitted && !event.time }" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="location">Local</label>
+                <InputText id="location" v-model="event.location" />
+            </div>
+
+            <div class="field">
+                <label for="description">Descrição</label>
+                <Textarea id="description" v-model="event.description" rows="3" />
+            </div>
+
+            <div class="field">
+                <label>Imagem do Evento</label>
+                <input
+                    type="file"
+                    @change="handleFileUpload"
+                    accept="image/*"
+                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                />
+                <img v-if="event.imagePreview" :src="event.imagePreview" class="mt-2 w-full border-round" style="max-height: 200px; object-fit: contain" />
+            </div>
+            <template #footer>
+                <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
+                <Button label="Salvar" icon="pi pi-check" @click="saveEvent" />
+            </template>
+        </Dialog>
+
+        <!-- Modal de Confirmação de Deleção -->
+        <Dialog v-model:visible="deleteEventDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
+            <div class="flex items-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                <span v-if="event"
+                    >Tem certeza que deseja deletar <b>{{ event.name }}</b
+                    >?</span
+                >
+            </div>
+            <template #footer>
+                <Button label="Não" icon="pi pi-times" text @click="deleteEventDialog = false" />
+                <Button label="Sim" icon="pi pi-check" @click="deleteEvent" />
+            </template>
+        </Dialog>
+
+        <!-- Modal de Confirmação de Deleção Múltipla -->
+        <Dialog v-model:visible="deleteEventsDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
+            <div class="flex items-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                <span>Tem certeza que deseja deletar os eventos selecionados?</span>
+            </div>
+            <template #footer>
+                <Button label="Não" icon="pi pi-times" text @click="deleteEventsDialog = false" />
+                <Button label="Sim" icon="pi pi-check" @click="deleteSelectedEvents" />
+            </template>
+        </Dialog>
     </div>
 </template>
