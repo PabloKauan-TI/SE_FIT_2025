@@ -11,8 +11,8 @@ const model = ref([
     {
         label: 'Users',
         items: [
-            { label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '' },
-            { label: 'Cadastrar', icon: 'pi pi-fw pi-user-plus', to: '' }
+            { label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '/pages/gerenciar-usuario' },
+            { label: 'Cadastrar', icon: 'pi pi-fw pi-user-plus', to: '/pages/cadastrar-usuario' }
         ]
     },
     {

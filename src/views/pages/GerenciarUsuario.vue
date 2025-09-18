@@ -48,52 +48,50 @@ const fetchUsers = async () => {
 
 <template>
     <AppTopbar />
-    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
-        <div class="card">
-            <Toolbar class="mb-6">
-                <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
-                </template>
+    <div class="card">
+        <Toolbar class="mb-6">
+            <template #start>
+                <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
+                <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+            </template>
 
-                <template #end>
-                    <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
-                </template>
-            </Toolbar>
+            <template #end>
+                <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
+            </template>
+        </Toolbar>
 
-            <DataTable
-                ref="dt"
-                :value="users"
-                selectionMode="checkbox"
-                :selection="selectedUsers"
-                @selection-change="(e) => (selectedUsers = e.value)"
-                dataKey="code"
-                paginator
-                :rows="10"
-                :rowsPerPageOptions="[5, 10, 25]"
-                class="datatable-responsive"
-                :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'"
-                :currentPageReportTemplate="'Showing {first} to {last} of {totalRecords} users'"
-            >
-                <template #header>
-                    <div class="flex flex-wrap gap-2 items-center justify-between">
-                        <h4 class="m-0">Gerenciar usuários</h4>
-                        <IconField>
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText placeholder="Search..." />
-                        </IconField>
-                    </div>
-                </template>
+        <DataTable
+            ref="dt"
+            :value="users"
+            selectionMode="checkbox"
+            :selection="selectedUsers"
+            @selection-change="(e) => (selectedUsers = e.value)"
+            dataKey="code"
+            paginator
+            :rows="10"
+            :rowsPerPageOptions="[5, 10, 25]"
+            class="datatable-responsive"
+            :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'"
+            :currentPageReportTemplate="'Showing {first} to {last} of {totalRecords} users'"
+        >
+            <template #header>
+                <div class="flex flex-wrap gap-2 items-center justify-between">
+                    <h4 class="m-0">Gerenciar usuários</h4>
+                    <IconField>
+                        <InputIcon>
+                            <i class="pi pi-search" />
+                        </InputIcon>
+                        <InputText placeholder="Search..." />
+                    </IconField>
+                </div>
+            </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="code" header="Code" sortable style="min-width: 12rem"></Column>
-                <Column field="name" header="Nome" sortable style="min-width: 16rem"></Column>
-                <Column field="escola" header="Escola" sortable style="min-width: 14rem"></Column>
-                <Column field="indentifield" header="Identificação" sortable style="min-width: 14rem"></Column>
-            </DataTable>
-        </div>
+            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column field="code" header="Code" sortable style="min-width: 12rem"></Column>
+            <Column field="name" header="Nome" sortable style="min-width: 16rem"></Column>
+            <Column field="escola" header="Escola" sortable style="min-width: 14rem"></Column>
+            <Column field="indentifield" header="Identificação" sortable style="min-width: 14rem"></Column>
+        </DataTable>
     </div>
 
     <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="Detalhes do Usuário" :modal="true">
