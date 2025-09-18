@@ -1,5 +1,4 @@
 <script setup>
-import AppTopbar from '@/layout/AppTopbar.vue'; // Importa o AppTopbar
 import EventService from '@/service/EventService.js';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
@@ -149,19 +148,9 @@ const exportCSV = () => dt.value.exportCSV();
 </script>
 
 <template>
-    <AppTopbar />
     <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
         <div class="card">
             <Toast />
-            <Toolbar class="mb-4">
-                <template #start>
-                    <Button label="Novo Evento" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Deletar" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedEvents || !selectedEvents.length" />
-                </template>
-                <template #end>
-                    <Button label="Exportar" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
-                </template>
-            </Toolbar>
 
             <DataTable
                 ref="dt"
