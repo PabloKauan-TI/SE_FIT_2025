@@ -13,8 +13,20 @@
                 <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV" />
             </template>
         </Toolbar>
+        <div v-if="isLoading" class="space-y-3">
+            <div v-for="n in 10" :key="n" class="flex gap-4 items-center">
+                <Skeleton class="w-8 h-8 rounded" /><!-- checkbox -->
+                <Skeleton class="flex-1 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-24 h-8 rounded" />
+            </div>
+        </div>
 
         <DataTable
+            v-else
             ref="dt"
             :value="events"
             v-model:selection="selectedEvents"
@@ -25,7 +37,6 @@
             class="datatable-responsive"
             :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'"
             :currentPageReportTemplate="'Showing {first} to {last} of {totalRecords} events'"
-            :loading="isLoading"
             responsiveLayout="scroll"
         >
             <template #header>
@@ -143,6 +154,7 @@
 <script setup>
 import AppTopbar from '@/layout/AppTopbar.vue';
 import EventService from '@/service/EventService.js';
+import { Skeleton } from 'primevue';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 

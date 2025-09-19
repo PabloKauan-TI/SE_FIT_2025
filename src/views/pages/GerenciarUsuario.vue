@@ -60,7 +60,21 @@ const fetchUsers = async () => {
             </template>
         </Toolbar>
 
+        <div v-if="isLoading" class="space-y-3">
+            <div v-for="n in 10" :key="n" class="flex gap-4 items-center">
+                <Skeleton class="w-8 h-8 rounded" />
+                <!-- checkbox -->
+                <Skeleton class="flex-1 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-32 h-6" />
+                <Skeleton class="w-24 h-8 rounded" />
+            </div>
+        </div>
+
         <DataTable
+            v-else
             ref="dt"
             :value="users"
             selectionMode="checkbox"
