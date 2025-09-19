@@ -8,6 +8,12 @@ const model = ref([
         items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }]
     },
     {
+        label: 'Conta',
+        items: [
+            { label: 'Meus Ingressos', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }
+        ]
+    },
+    {
         label: 'Users',
         items: [{ label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '/pages/gerenciar-usuario' }]
     },
@@ -19,7 +25,7 @@ const model = ref([
             { label: 'Detalhes (Exemplo)', icon: 'pi pi-fw pi-search', to: { name: 'detalhes-evento', params: { id: 1 } } },
             
             { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/GerenciarEventos' },
-            { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/CadastrarEventos' }
+            { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/CadastroEventos' }
         ]
     }
 ]);

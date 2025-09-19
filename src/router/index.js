@@ -47,6 +47,12 @@ const router = createRouter({
                     path: '/eventos/:id',
                     name: 'detalhes-evento',
                     component: () => import('@/views/pages/DetalhesEvento.vue')
+                },
+                // --- ROTA ADICIONADA ---
+                {
+                    path: '/meus-ingressos',
+                    name: 'meus-ingressos',
+                    component: () => import('@/views/pages/MeusIngressos.vue')
                 }
             ]
         },
