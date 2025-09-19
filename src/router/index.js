@@ -24,12 +24,12 @@ const router = createRouter({
                     component: () => import('@/views/pages/CadastrarUsuario.vue')
                 },
                 {
-                    path: '/pages/CadastroEventos',
+                    path: '/pages/cadastrar-eventos',
                     name: 'CadastroEventos',
                     component: () => import('@/views/pages/CadastroEventos.vue')
                 },
                 {
-                    path: '/pages/GerenciarEventos',
+                    path: '/pages/gerenciar-eventos',
                     name: 'GerenciarEventos',
                     component: () => import('@/views/pages/GerenciarEventos.vue')
                 },

@@ -18,8 +18,8 @@ const model = ref([
     {
         label: 'Eventos',
         items: [
-            { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/GerenciarEventos' },
-            { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/CadastrarEventos' }
+            { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/gerenciar-eventos' },
+            { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/cadastrar-eventos' }
         ]
     }
 ]);

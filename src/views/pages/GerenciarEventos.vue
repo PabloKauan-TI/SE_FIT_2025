@@ -1,176 +1,46 @@
-<script setup>
-import EventService from '@/service/EventService.js';
-import { useToast } from 'primevue/usetoast';
-import { onMounted, ref } from 'vue';
-
-// --- Estado do Componente ---
-const toast = useToast();
-const dt = ref();
-const events = ref([]);
-const selectedEvents = ref([]);
-
-const eventDialog = ref(false);
-const deleteEventDialog = ref(false);
-const deleteEventsDialog = ref(false);
-
-const event = ref({});
-const submitted = ref(false);
-const isLoading = ref(true);
-
-// --- Ciclo de Vida ---
-onMounted(() => {
-    fetchEvents();
-});
-
-// --- Funções de API ---
-const fetchEvents = async () => {
-    isLoading.value = true;
-    try {
-        const response = await EventService.getAll();
-        events.value = response.data || response;
-    } catch (err) {
-        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar a lista de eventos.', life: 3000 });
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-const saveEvent = async () => {
-    submitted.value = true;
-    if (!event.value.name || !event.value.date || !event.value.time) {
-        toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha os campos obrigatórios.', life: 3000 });
-        return;
-    }
-
-    const formData = new FormData();
-    Object.keys(event.value).forEach((key) => {
-        if (key === 'image' && event.value.image instanceof File) {
-            formData.append('image', event.value.image);
-        } else if (event.value[key] !== null && event.value[key] !== undefined) {
-            if (key !== 'imagePreview') {
-                formData.append(key, event.value[key]);
-            }
-        }
-    });
-
-    if (event.value.date && event.value.time) {
-        formData.set('date', `${event.value.date} ${event.value.time}:00`);
-    }
-
-    try {
-        if (event.value.id) {
-            await EventService.update(event.value.id, formData);
-            toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento atualizado', life: 3000 });
-        } else {
-            await EventService.store(formData);
-            toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento criado', life: 3000 });
-        }
-        hideDialog();
-        fetchEvents();
-    } catch (err) {
-        const errorMessage = err.response?.data?.message || 'Falha ao salvar o evento.';
-        toast.add({ severity: 'error', summary: 'Erro', detail: errorMessage, life: 3000 });
-    }
-};
-
-const deleteEvent = async () => {
-    try {
-        await EventService.destroy(event.value.id);
-        events.value = events.value.filter((val) => val.id !== event.value.id);
-        deleteEventDialog.value = false;
-        event.value = {};
-        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento deletado', life: 3000 });
-    } catch (err) {
-        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível deletar o evento.', life: 3000 });
-    }
-};
-
-const deleteSelectedEvents = async () => {
-    try {
-        const promises = selectedEvents.value.map((eventToDelete) => EventService.destroy(eventToDelete.id));
-        await Promise.all(promises);
-
-        events.value = events.value.filter((val) => !selectedEvents.value.some((selected) => selected.id === val.id));
-        deleteEventsDialog.value = false;
-        selectedEvents.value = [];
-        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Eventos deletados', life: 3000 });
-    } catch (err) {
-        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível deletar os eventos selecionados.', life: 3000 });
-    }
-};
-
-// --- Funções de UI ---
-const openNew = () => {
-    event.value = {};
-    submitted.value = false;
-    eventDialog.value = true;
-};
-
-const editEvent = (eventData) => {
-    event.value = { ...eventData };
-    if (event.value.date) {
-        const dateObj = new Date(event.value.date);
-        event.value.date = dateObj.toISOString().split('T')[0];
-        event.value.time = dateObj.toTimeString().split(' ')[0].substring(0, 5);
-    }
-    event.value.imagePreview = event.value.image_url;
-    eventDialog.value = true;
-};
-
-const confirmDeleteEvent = (eventData) => {
-    event.value = eventData;
-    deleteEventDialog.value = true;
-};
-
-const confirmDeleteSelected = () => {
-    deleteEventsDialog.value = true;
-};
-
-const hideDialog = () => {
-    eventDialog.value = false;
-    submitted.value = false;
-};
-
-const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        event.value.image = file;
-        event.value.imagePreview = URL.createObjectURL(file);
-    }
-};
-
-const formatDate = (value) => {
-    if (value) return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-    return '';
-};
-
-const exportCSV = () => dt.value.exportCSV();
-</script>
-
 <template>
+    <AppTopbar />
+
     <div class="card">
         <Toast />
+
+        <Toolbar class="mb-6">
+            <template #start>
+                <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
+                <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedEvents || !selectedEvents.length" />
+            </template>
+            <template #end>
+                <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV" />
+            </template>
+        </Toolbar>
 
         <DataTable
             ref="dt"
             :value="events"
             v-model:selection="selectedEvents"
             dataKey="id"
-            :paginator="true"
+            paginator
             :rows="10"
             :rowsPerPageOptions="[5, 10, 25]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} eventos"
+            class="datatable-responsive"
+            :paginatorTemplate="'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown'"
+            :currentPageReportTemplate="'Showing {first} to {last} of {totalRecords} events'"
             :loading="isLoading"
             responsiveLayout="scroll"
         >
             <template #header>
                 <div class="flex flex-wrap gap-2 items-center justify-between">
-                    <h4 class="m-0">Gerenciar Eventos</h4>
+                    <h4 class="m-0">Gerenciar eventos</h4>
+
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-search" style="font-size: 1.1rem"></i>
+                        <InputText v-model="search" placeholder="Search..." @input="onSearchInput" />
+                    </div>
                 </div>
             </template>
 
-            <Column selectionMode="multiple" style="width: 3rem" />
+            <Column selectionMode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="id" header="ID" sortable style="min-width: 8rem" />
             <Column field="name" header="Nome" sortable style="min-width: 16rem" />
             <Column field="date" header="Data" sortable style="min-width: 12rem">
                 <template #body="slotProps">
@@ -178,84 +48,283 @@ const exportCSV = () => dt.value.exportCSV();
                 </template>
             </Column>
             <Column field="location" header="Local" sortable style="min-width: 14rem" />
-            <Column headerStyle="min-width:10rem;" bodyClass="text-center">
+            <Column header="Ações" style="min-width: 14rem" :exportable="false">
                 <template #body="slotProps">
-                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="editEvent(slotProps.data)" />
-                    <Button icon="pi pi-trash" class="p-button-rounded p-button-danger" @click="confirmDeleteEvent(slotProps.data)" />
+                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="onEdit(slotProps.data)" />
                 </template>
             </Column>
         </DataTable>
-
-        <!-- Modal de Criação/Edição -->
-        <Dialog v-model:visible="eventDialog" :style="{ width: '450px' }" header="Detalhes do Evento" :modal="true" class="p-fluid">
-            <div class="field">
-                <label for="name">Nome</label>
-                <InputText id="name" v-model.trim="event.name" required="true" autofocus :class="{ 'p-invalid': submitted && !event.name }" />
-                <small class="p-error" v-if="submitted && !event.name">O nome é obrigatório.</small>
-            </div>
-
-            <div class="formgrid grid">
-                <div class="field col">
-                    <label for="date">Data</label>
-                    <InputText id="date" type="date" v-model="event.date" :class="{ 'p-invalid': submitted && !event.date }" />
-                </div>
-                <div class="field col">
-                    <label for="time">Horário</label>
-                    <InputText id="time" type="time" v-model="event.time" :class="{ 'p-invalid': submitted && !event.time }" />
-                </div>
-            </div>
-
-            <div class="field">
-                <label for="location">Local</label>
-                <InputText id="location" v-model="event.location" />
-            </div>
-
-            <div class="field">
-                <label for="description">Descrição</label>
-                <Textarea id="description" v-model="event.description" rows="3" />
-            </div>
-
-            <div class="field">
-                <label>Imagem do Evento</label>
-                <input
-                    type="file"
-                    @change="handleFileUpload"
-                    accept="image/*"
-                    class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                />
-                <img v-if="event.imagePreview" :src="event.imagePreview" class="mt-2 w-full border-round" style="max-height: 200px; object-fit: contain" />
-            </div>
-            <template #footer>
-                <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
-                <Button label="Salvar" icon="pi pi-check" @click="saveEvent" />
-            </template>
-        </Dialog>
-
-        <!-- Modal de Confirmação de Deleção -->
-        <Dialog v-model:visible="deleteEventDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
-            <div class="flex items-center">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="event"
-                    >Tem certeza que deseja deletar <b>{{ event.name }}</b
-                    >?</span
-                >
-            </div>
-            <template #footer>
-                <Button label="Não" icon="pi pi-times" text @click="deleteEventDialog = false" />
-                <Button label="Sim" icon="pi pi-check" @click="deleteEvent" />
-            </template>
-        </Dialog>
-
-        <!-- Modal de Confirmação de Deleção Múltipla -->
-        <Dialog v-model:visible="deleteEventsDialog" :style="{ width: '450px' }" header="Confirmar" :modal="true">
-            <div class="flex items-center">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span>Tem certeza que deseja deletar os eventos selecionados?</span>
-            </div>
-            <template #footer>
-                <Button label="Não" icon="pi pi-times" text @click="deleteEventsDialog = false" />
-                <Button label="Sim" icon="pi pi-check" @click="deleteSelectedEvents" />
-            </template>
-        </Dialog>
     </div>
+
+    <!-- Dialog de Criação/Edição -->
+    <Dialog v-model:visible="eventDialog" :style="{ width: '600px' }" header="Cadastro de Evento" :modal="true">
+        <div class="event-registration-container">
+            <div class="event-header mb-4">
+                <h2 class="text-xl font-bold">Cadastro de Evento</h2>
+            </div>
+
+            <form @submit.prevent="submitForm">
+                <div class="grid grid-nogutter">
+                    <div class="col-12 md:col-6 p-2">
+                        <label class="block mb-2">Nome do Evento</label>
+                        <InputText v-model.trim="form.name" placeholder="Nome" :class="{ 'p-invalid': errors.name }" />
+                        <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
+                    </div>
+
+                    <div class="col-6 md:col-3 p-2">
+                        <label class="block mb-2">Data</label>
+                        <InputText type="date" v-model="form.date" :class="{ 'p-invalid': errors.date }" />
+                        <small v-if="errors.date" class="p-error">{{ errors.date }}</small>
+                    </div>
+
+                    <div class="col-6 md:col-3 p-2">
+                        <label class="block mb-2">Horário</label>
+                        <InputText type="time" v-model="form.time" :class="{ 'p-invalid': errors.time }" />
+                        <small v-if="errors.time" class="p-error">{{ errors.time }}</small>
+                    </div>
+
+                    <div class="col-12 p-2">
+                        <label class="block mb-2">Local</label>
+                        <InputText v-model.trim="form.location" placeholder="Local do evento" />
+                    </div>
+
+                    <div class="col-12 p-2">
+                        <label class="block mb-2">Descrição</label>
+                        <Textarea v-model.trim="form.description" rows="4" />
+                    </div>
+
+                    <div class="col-12 p-2">
+                        <label class="block mb-2">Imagem do Evento</label>
+
+                        <div class="p-3 border-1 surface-border border-round" style="cursor: pointer" @click="triggerFileInput">
+                            <div class="flex flex-column align-items-center justify-content-center">
+                                <i class="pi pi-cloud-upload" style="font-size: 2rem"></i>
+                                <small>Clique para enviar uma imagem (JPG/PNG, máximo 5MB)</small>
+                            </div>
+                        </div>
+
+                        <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" style="display: none" />
+
+                        <div v-if="form.imagePreview" class="mt-3">
+                            <img :src="form.imagePreview" style="max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px" />
+                            <div class="mt-2">
+                                <Button label="Remover Imagem" icon="pi pi-times" class="p-button-sm p-button-warning" @click="removeImage" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex justify-content-end gap-2">
+                    <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="onCancel" />
+                    <Button label="Salvar Evento" icon="pi pi-check" type="submit" />
+                </div>
+            </form>
+        </div>
+    </Dialog>
 </template>
+
+<script setup>
+import AppTopbar from '@/layout/AppTopbar.vue';
+import EventService from '@/service/EventService.js';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref } from 'vue';
+
+// estado
+const dt = ref(null);
+const events = ref([]);
+const selectedEvents = ref([]);
+const isLoading = ref(false);
+const error = ref(null);
+
+const eventDialog = ref(false);
+
+// form local (usado pelo Dialog)
+const form = ref({
+    id: null,
+    name: '',
+    date: '',
+    time: '',
+    location: '',
+    description: '',
+    image: null,
+    imagePreview: ''
+});
+
+const errors = ref({});
+const fileInput = ref(null);
+const search = ref('');
+const toast = useToast();
+
+// busca inicial
+onMounted(() => {
+    fetchEvents();
+});
+
+const fetchEvents = async () => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+        const response = await EventService.getAll();
+        events.value = response.data ?? response;
+    } catch (err) {
+        console.error('Falha ao buscar eventos:', err);
+        error.value = 'Não foi possível carregar a lista de eventos.';
+        toast.add({ severity: 'error', summary: 'Erro', detail: error.value, life: 3000 });
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+function openNew() {
+    resetForm();
+    eventDialog.value = true;
+}
+
+function onEdit(evt) {
+    // preenche o form com os dados do evento
+    form.value.id = evt.id ?? null;
+    form.value.name = evt.name ?? '';
+    if (evt.date) {
+        const d = new Date(evt.date);
+        if (!Number.isNaN(d.getTime())) {
+            form.value.date = d.toISOString().split('T')[0];
+            form.value.time = d.toTimeString().split(' ')[0].substring(0, 5);
+        } else {
+            form.value.date = evt.date;
+            form.value.time = evt.time ?? '';
+        }
+    }
+    form.value.location = evt.location ?? '';
+    form.value.description = evt.description ?? '';
+    form.value.image = null;
+    form.value.imagePreview = evt.image_url ?? '';
+    errors.value = {};
+    eventDialog.value = true;
+}
+
+function triggerFileInput() {
+    fileInput.value && fileInput.value.click();
+}
+
+function handleFileUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // validação tamanho (máx 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Imagem muito grande (máx 5MB).', life: 3000 });
+        return;
+    }
+
+    form.value.image = file;
+    form.value.imagePreview = URL.createObjectURL(file);
+}
+
+function removeImage() {
+    form.value.image = null;
+    form.value.imagePreview = '';
+    if (fileInput.value) fileInput.value.value = null;
+}
+
+function validateForm() {
+    errors.value = {};
+    if (!form.value.name) errors.value.name = 'Nome é obrigatório';
+    if (!form.value.date) errors.value.date = 'Data é obrigatória';
+    if (!form.value.time) errors.value.time = 'Horário é obrigatório';
+    return Object.keys(errors.value).length === 0;
+}
+
+async function submitForm() {
+    if (!validateForm()) {
+        toast.add({ severity: 'warn', summary: 'Aviso', detail: 'Preencha os campos obrigatórios.', life: 3000 });
+        return;
+    }
+
+    // monta FormData para enviar imagem caso exista
+    const payload = new FormData();
+    payload.append('name', form.value.name);
+    payload.append('date', `${form.value.date} ${form.value.time}:00`);
+    if (form.value.location) payload.append('location', form.value.location);
+    if (form.value.description) payload.append('description', form.value.description);
+    if (form.value.image instanceof File) payload.append('image', form.value.image);
+
+    try {
+        if (form.value.id) {
+            await EventService.update(form.value.id, payload);
+            toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento atualizado', life: 3000 });
+        } else {
+            await EventService.store(payload);
+            toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento criado', life: 3000 });
+        }
+        eventDialog.value = false;
+        await fetchEvents();
+    } catch (err) {
+        console.error('Erro ao salvar evento:', err);
+        toast.add({ severity: 'error', summary: 'Erro', detail: err.response?.data?.message || 'Falha ao salvar.', life: 4000 });
+    }
+}
+
+function onCancel() {
+    eventDialog.value = false;
+    resetForm();
+}
+
+function resetForm() {
+    form.value = {
+        id: null,
+        name: '',
+        date: '',
+        time: '',
+        location: '',
+        description: '',
+        image: null,
+        imagePreview: ''
+    };
+    errors.value = {};
+    if (fileInput.value) fileInput.value.value = null;
+}
+
+async function confirmDeleteSelected() {
+    if (!selectedEvents.value?.length) return;
+    if (!confirm(`Deletar ${selectedEvents.value.length} eventos?`)) return;
+    try {
+        const promises = selectedEvents.value.map((ev) => EventService.destroy(ev.id));
+        await Promise.all(promises);
+        events.value = events.value.filter((val) => !selectedEvents.value.some((s) => s.id === val.id));
+        selectedEvents.value = [];
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Eventos deletados', life: 3000 });
+    } catch (err) {
+        console.error('Falha ao deletar selecionados:', err);
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao deletar eventos', life: 3000 });
+    }
+}
+
+function exportCSV() {
+    dt.value && dt.value.exportCSV();
+}
+
+function formatDate(value) {
+    if (!value) return '';
+    try {
+        return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    } catch {
+        return value;
+    }
+}
+
+// (opcional) busca simples por nome — só filtra localmente
+function onSearchInput() {
+    const q = search.value?.toLowerCase?.() ?? '';
+    if (!q) return fetchEvents();
+    events.value = (events.valueRaw ?? events.value).filter((e) => (e.name ?? '').toLowerCase().includes(q) || (e.location ?? '').toLowerCase().includes(q));
+}
+</script>
+
+<style scoped>
+.event-registration-container .p-invalid {
+    border-color: var(--red-500);
+}
+.preview-image {
+    display: block;
+}
+</style>
