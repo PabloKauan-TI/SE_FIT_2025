@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-
 import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
@@ -15,6 +14,10 @@ const model = ref([
     {
         label: 'Eventos',
         items: [
+            { label: 'Ver Eventos', icon: 'pi pi-fw pi-eye', to: { name: 'mostrar-eventos' } },
+            
+            { label: 'Detalhes (Exemplo)', icon: 'pi pi-fw pi-search', to: { name: 'detalhes-evento', params: { id: 1 } } },
+            
             { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/GerenciarEventos' },
             { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/CadastrarEventos' }
         ]
@@ -30,5 +33,3 @@ const model = ref([
         </template>
     </ul>
 </template>
-
-<style lang="scss" scoped></style>

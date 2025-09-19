@@ -37,6 +37,16 @@ const router = createRouter({
                     path: '/pages/perfil-usuario',
                     name: 'perfil-usuario',
                     component: () => import('@/views/pages/PerfilUsuario.vue')
+                },
+                {
+                    path: '/eventos',
+                    name: 'mostrar-eventos',
+                    component: () => import('@/views/pages/MostrarEventos.vue')
+                },
+                {
+                    path: '/eventos/:id',
+                    name: 'detalhes-evento',
+                    component: () => import('@/views/pages/DetalhesEvento.vue')
                 }
             ]
         },
@@ -50,7 +60,6 @@ const router = createRouter({
             name: 'notfound',
             component: () => import('@/views/pages/NotFound.vue')
         },
-
         {
             path: '/auth/login',
             name: 'login',
