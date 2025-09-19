@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-
 import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
@@ -9,17 +8,29 @@ const model = ref([
         items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/' }]
     },
     {
-        label: 'Users',
+        label: 'Conta',
         items: [
-            { label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '/pages/gerenciar-usuario' },
-            { label: 'Cadastrar', icon: 'pi pi-fw pi-user-plus', to: '/pages/cadastrar-usuario' }
+            { label: 'Meus Ingressos', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }
         ]
+    },
+    {
+        label: 'Users',
+        items: [{ label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '/pages/gerenciar-usuario' }]
     },
     {
         label: 'Eventos',
         items: [
+<<<<<<< HEAD
             { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/gerenciar-eventos' },
             { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/cadastrar-eventos' }
+=======
+            { label: 'Ver Eventos', icon: 'pi pi-fw pi-eye', to: { name: 'mostrar-eventos' } },
+            
+            { label: 'Detalhes (Exemplo)', icon: 'pi pi-fw pi-search', to: { name: 'detalhes-evento', params: { id: 1 } } },
+            
+            { label: 'Gerenciar', icon: 'pi pi-fw pi-calendar', to: '/pages/GerenciarEventos' },
+            { label: 'Cadastrar', icon: 'pi pi-fw pi-calendar-plus', to: '/pages/CadastroEventos' }
+>>>>>>> 4fe0e5e92998fa97d6232d482261b15eaf640736
         ]
     }
 ]);
@@ -33,5 +44,3 @@ const model = ref([
         </template>
     </ul>
 </template>
-
-<style lang="scss" scoped></style>
