@@ -56,67 +56,84 @@
         </DataTable>
     </div>
 
-    <!-- Dialog de Criação/Edição -->
-    <Dialog v-model:visible="eventDialog" :style="{ width: '600px' }" header="Cadastro de Evento" :modal="true">
+    <Dialog v-model:visible="eventDialog" :style="{ width: '650px' }" header="Cadastro de Evento" :modal="true" class="rounded-2xl shadow-lg">
         <div class="event-registration-container">
-            <div class="event-header mb-4">
-                <h2 class="text-xl font-bold">Cadastro de Evento</h2>
-            </div>
-
-            <form @submit.prevent="submitForm">
-                <div class="grid grid-nogutter">
-                    <div class="col-12 md:col-6 p-2">
-                        <label class="block mb-2">Nome do Evento</label>
-                        <InputText v-model.trim="form.name" placeholder="Nome" :class="{ 'p-invalid': errors.name }" />
+            <!-- Form -->
+            <form @submit.prevent="submitForm" class="space-y-5">
+                <div class="grid grid-nogutter gap-4">
+                    <!-- Nome -->
+                    <div class="col-12 md:col-6">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-tag text-gray-600"></i>
+                            Nome do Evento
+                        </label>
+                        <InputText v-model.trim="form.name" placeholder="Ex: Workshop de Tecnologia" class="w-full" :class="{ 'p-invalid': errors.name }" />
                         <small v-if="errors.name" class="p-error">{{ errors.name }}</small>
                     </div>
 
-                    <div class="col-6 md:col-3 p-2">
-                        <label class="block mb-2">Data</label>
-                        <InputText type="date" v-model="form.date" :class="{ 'p-invalid': errors.date }" />
+                    <!-- Data -->
+                    <div class="col-6 md:col-3">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-calendar text-gray-600"></i>
+                            Data
+                        </label>
+                        <InputText type="date" v-model="form.date" class="w-full" :class="{ 'p-invalid': errors.date }" />
                         <small v-if="errors.date" class="p-error">{{ errors.date }}</small>
                     </div>
 
-                    <div class="col-6 md:col-3 p-2">
-                        <label class="block mb-2">Horário</label>
-                        <InputText type="time" v-model="form.time" :class="{ 'p-invalid': errors.time }" />
+                    <!-- Hora -->
+                    <div class="col-6 md:col-3">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-clock text-gray-600"></i>
+                            Horário
+                        </label>
+                        <InputText type="time" v-model="form.time" class="w-full" :class="{ 'p-invalid': errors.time }" />
                         <small v-if="errors.time" class="p-error">{{ errors.time }}</small>
                     </div>
 
-                    <div class="col-12 p-2">
-                        <label class="block mb-2">Local</label>
-                        <InputText v-model.trim="form.location" placeholder="Local do evento" />
+                    <!-- Local -->
+                    <div class="col-12">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-map-marker text-gray-600"></i>
+                            Local
+                        </label>
+                        <InputText v-model.trim="form.location" placeholder="Ex: Auditório Central" class="w-full" />
                     </div>
 
-                    <div class="col-12 p-2">
-                        <label class="block mb-2">Descrição</label>
-                        <Textarea v-model.trim="form.description" rows="4" />
+                    <!-- Descrição -->
+                    <div class="col-12">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-align-left text-gray-600"></i>
+                            Descrição
+                        </label>
+                        <Textarea v-model.trim="form.description" rows="4" placeholder="Escreva uma breve descrição do evento..." class="w-full" />
                     </div>
 
-                    <div class="col-12 p-2">
-                        <label class="block mb-2">Imagem do Evento</label>
-
-                        <div class="p-3 border-1 surface-border border-round" style="cursor: pointer" @click="triggerFileInput">
-                            <div class="flex flex-column align-items-center justify-content-center">
-                                <i class="pi pi-cloud-upload" style="font-size: 2rem"></i>
-                                <small>Clique para enviar uma imagem (JPG/PNG, máximo 5MB)</small>
-                            </div>
+                    <!-- Upload de Imagem -->
+                    <div class="col-12">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-image text-gray-600"></i>
+                            Imagem do Evento
+                        </label>
+                        <div class="p-4 border-2 border-dashed border-surface-400 rounded-lg text-center hover:bg-gray-50 transition cursor-pointer" @click="triggerFileInput">
+                            <i class="pi pi-cloud-upload text-4xl text-gray-500"></i>
+                            <p class="mt-2 text-gray-600 text-sm">Clique para enviar uma imagem (JPG/PNG, até 5MB)</p>
                         </div>
+                        <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" class="hidden" />
 
-                        <input type="file" ref="fileInput" @change="handleFileUpload" accept="image/*" style="display: none" />
-
-                        <div v-if="form.imagePreview" class="mt-3">
-                            <img :src="form.imagePreview" style="max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px" />
+                        <div v-if="form.imagePreview" class="mt-3 text-center">
+                            <img :src="form.imagePreview" class="max-h-48 mx-auto rounded-md shadow-md object-contain" />
                             <div class="mt-2">
-                                <Button label="Remover Imagem" icon="pi pi-times" class="p-button-sm p-button-warning" @click="removeImage" />
+                                <Button label="Remover Imagem" icon="pi pi-times" class="p-button-sm p-button-danger" @click="removeImage" />
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 flex justify-content-end gap-2">
-                    <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="onCancel" />
-                    <Button label="Salvar Evento" icon="pi pi-check" type="submit" />
+                <!-- Ações -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                    <Button label="Cancelar" icon="pi pi-times" class="p-button-text p-button-plain" @click="onCancel" />
+                    <Button label="Salvar Evento" icon="pi pi-check" type="submit" class="p-button-success" />
                 </div>
             </form>
         </div>
