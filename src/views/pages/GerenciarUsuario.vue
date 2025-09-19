@@ -1,7 +1,7 @@
 <script setup>
 import AppTopbar from '@/layout/AppTopbar.vue';
 import UserService from '@/service/UserService.js';
-import { Toolbar } from 'primevue';
+import { Toolbar, useToast } from 'primevue';
 import { onMounted, ref } from 'vue';
 
 const dt = ref();
@@ -11,6 +11,8 @@ const userDialog = ref(false);
 const user = ref({});
 const isLoading = ref(false);
 const error = ref(null);
+
+const toast = useToast();
 
 onMounted(() => {
     fetchUsers();
@@ -40,6 +42,7 @@ const fetchUsers = async () => {
     } catch (err) {
         console.error('Falha ao buscar usuários:', err);
         error.value = 'Não foi possível carregar a lista de usuários.';
+        toast.add({ severity: 'error', summary: 'Erro', detail: error.value, life: 3000 });
     } finally {
         isLoading.value = false;
     }
@@ -49,6 +52,7 @@ const fetchUsers = async () => {
 <template>
     <AppTopbar />
     <div class="card">
+        <Toast />
         <Toolbar class="mb-6">
             <template #start>
                 <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
