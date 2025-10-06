@@ -8,14 +8,24 @@
 
         <form @submit.prevent="submitForm">
             <div class="form-grid">
-                <div class="form-group" :class="{ error: errors.name }">
+                <div class="form-group" :class="{ error: errors.nome }">
                     <label class="form-label">Nome do Evento</label>
-                    <input type="text" class="form-control" v-model="form.name" placeholder="Digite o nome do evento" />
+                    <input type="text" class="form-control" v-model="form.nome" placeholder="Digite o nome do evento" />
                 </div>
 
-                <div class="form-group" :class="{ error: errors.date }">
+                <div class="form-group" :class="{ error: errors.palestrante }">
+                    <label class="form-label">Palestrante</label>
+                    <input type="text" class="form-control" v-model="form.palestrante" placeholder="Nome do palestrante" />
+                </div>
+
+                <div class="form-group" :class="{ error: errors.data }">
                     <label class="form-label">Data do Evento</label>
-                    <input type="date" class="form-control" v-model="form.date" />
+                    <input type="date" class="form-control" v-model="form.data" />
+                </div>
+
+                <div class="form-group" :class="{ error: errors.limit }">
+                    <label class="form-label">Limite de Vagas</label>
+                    <input type="number" class="form-control" v-model.number="form.limit" placeholder="Ex: 50" />
                 </div>
 
                 <div class="form-group" :class="{ error: errors.time }">
@@ -58,6 +68,7 @@
 </template>
 
 <script setup>
+import EventService from '@/service/EventService'; // 1. Importar o EventService
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { reactive, ref } from 'vue';
@@ -72,7 +83,9 @@ const form = reactive({
     location: '',
     description: '',
     image: null,
-    imagePreview: ''
+    imagePreview: '',
+    speaker: '',
+    limit: null
 });
 
 // Estado de erros
@@ -133,6 +146,14 @@ const validateForm = () => {
         errors.name = 'Nome do evento é obrigatório';
         isValid = false;
     }
+    if (!form.speaker.trim()) {
+        errors.speaker = 'Nome do palestrante é obrigatório';
+        isValid = false;
+    }
+    if (!form.limit || form.limit <= 0) {
+        errors.limit = 'Limite de vagas deve ser um número maior que zero';
+        isValid = false;
+    }
     if (!form.date) {
         errors.date = 'Data é obrigatória';
         isValid = false;
@@ -160,7 +181,9 @@ const resetForm = () => {
         location: '',
         description: '',
         image: null,
-        imagePreview: ''
+        imagePreview: '',
+        speaker: '',
+        limit: null
     });
     Object.keys(errors).forEach((key) => (errors[key] = ''));
     if (fileInput.value) {
@@ -174,40 +197,29 @@ const submitForm = async () => {
         return;
     }
 
-    const apiUrl = 'http://localhost:8000/api/events';
-    const authToken = localStorage.getItem('user_token') || 'SEU_TOKEN_DE_AUTENTICACAO_AQUI';
-
     const formData = new FormData();
     formData.append('name', form.name);
-    formData.append('date', `${form.date} ${form.time}`);
+    // Formata a data e hora corretamente para o backend
+    formData.append('date', `${form.date} ${form.time}:00`);
     formData.append('location', form.location);
     formData.append('description', form.description);
+    formData.append('speaker', form.speaker);
+    formData.append('limit', form.limit);
     if (form.image) {
         formData.append('image', form.image);
     }
 
+    console.log('Form Data:', formData);
+
+    // 2. Usar o EventService para criar o evento
     try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${authToken}`,
-                Accept: 'application/json'
-            },
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento cadastrado com sucesso!', life: 3000 });
-            resetForm();
-        } else {
-            const errorMessage = result.message || 'Ocorreu um erro ao salvar o evento.';
-            toast.add({ severity: 'error', summary: 'Erro', detail: errorMessage, life: 4000 });
-        }
+        await EventService.store(formData);
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Evento cadastrado com sucesso!', life: 3000 });
+        resetForm();
     } catch (error) {
         console.error('Erro de conexão:', error);
-        toast.add({ severity: 'error', summary: 'Erro de Conexão', detail: 'Não foi possível conectar ao servidor.', life: 4000 });
+        const errorMessage = error.response?.data?.message || 'Ocorreu um erro ao salvar o evento.';
+        toast.add({ severity: 'error', summary: 'Erro', detail: errorMessage, life: 4000 });
     }
 };
 </script>

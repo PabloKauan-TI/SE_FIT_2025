@@ -21,6 +21,8 @@ export default {
      * @param {FormData} data Os dados do evento, incluindo a imagem.
      */
     store(data) {
+        // Usamos o 'qs' para serializar os dados, o que ajuda o backend (PHP) a interpretar o FormData corretamente.
+        // O Axios cuidará do Content-Type automaticamente.
         return api.post('/events', data);
     },
 
@@ -32,6 +34,8 @@ export default {
      */
     update(id, data) {
         // A sua rota de backend para update é: Route::post('/eventos/{id}', ...)
+        // O campo `_method: 'PUT'` já está no FormData, e o Axios vai lidar com o Content-Type.
+        // A rota está correta (/eventos/{id}).
         return api.post(`/eventos/${id}`, data);
     },
 
