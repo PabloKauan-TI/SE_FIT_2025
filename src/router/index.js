@@ -53,6 +53,10 @@ const router = createRouter({
                     path: '/meus-ingressos',
                     name: 'meus-ingressos',
                     component: () => import('@/views/pages/MeusIngressos.vue')
+                },
+                {
+                    path: '/scan_ticket',
+                    component: () => import('@/views/pages/Scan.vue')
                 }
             ]
         },

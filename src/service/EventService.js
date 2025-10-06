@@ -32,7 +32,7 @@ export default {
      */
     update(id, data) {
         // A sua rota de backend para update é: Route::post('/eventos/{id}', ...)
-        return api.post(`/eventos/${id}`, data);
+        return api.put(`/events/${id}`, data);
     },
 
     /**

@@ -20,6 +20,6 @@ export default {
         return api.get('/logout');
     },
     login(credentials) {
-        api.post('/login', credentials);
+        return api.post('/login', credentials);
     }
 };

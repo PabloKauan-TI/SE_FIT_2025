@@ -15,10 +15,27 @@ const Login = async () => {
             password: password.value
         });
 
-        router.push('/');
+        // 💡 Ajuste para verificar o token na resposta do Axios
+        if (response.data && response.data.token) {
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('type', response.data.user['type']);
+            router.push('/');
+        } else {
+            // Este bloco é para logins que retornam 200, mas sem o token
+            alert('Falha no login: Resposta inesperada.');
+        }
     } catch (error) {
         console.error('Erro ao fazer login:', error);
-        alert('Falha no login, verifique suas credenciais');
+
+        // 💡 CORREÇÃO DE ERRO NO CATCH: Acessa a mensagem do erro HTTP (se existir) de forma segura
+        const apiMessage = error.response?.data?.message;
+
+        if (apiMessage) {
+            alert(apiMessage);
+        } else {
+            // Para erros de rede, timeout, ou quando error.response é indefinido
+            alert('Falha na comunicação com o servidor. Tente novamente.');
+        }
     }
 };
 </script>
