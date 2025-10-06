@@ -4,7 +4,7 @@ import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([]);
 
-const userType = localStorage.getItem('type');
+const userType = sessionStorage.getItem('type');
 
 const adminMenu = [
     {
