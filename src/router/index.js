@@ -19,11 +19,6 @@ const router = createRouter({
                     component: () => import('@/views/pages/GerenciarUsuario.vue')
                 },
                 {
-                    path: '/pages/cadastrar-usuario',
-                    name: 'cadastrar-usuario',
-                    component: () => import('@/views/pages/CadastrarUsuario.vue')
-                },
-                {
                     path: '/pages/cadastrar-eventos',
                     name: 'CadastroEventos',
                     component: () => import('@/views/pages/CadastroEventos.vue')
@@ -59,6 +54,11 @@ const router = createRouter({
                     component: () => import('@/views/pages/Scan.vue')
                 }
             ]
+        },
+        {
+            path: '/pages/cadastrar-usuario',
+            name: 'cadastrar-usuario',
+            component: () => import('@/views/pages/CadastrarUsuario.vue')
         },
         {
             path: '/landing',
