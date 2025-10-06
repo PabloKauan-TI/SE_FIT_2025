@@ -1,12 +1,17 @@
 <script setup>
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import { useLayout } from '@/layout/composables/layout';
 import userService from '@/service/UserService';
+import { useToast } from 'primevue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+
+const { isDarkTheme } = useLayout();
 
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+const toast = useToast();
 
 const Login = async () => {
     try {
@@ -15,42 +20,37 @@ const Login = async () => {
             password: password.value
         });
 
-        // 💡 Ajuste para verificar o token na resposta do Axios
         if (response.data && response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('type', response.data.user['type']);
+            sessionStorage.setItem('token', response.data.token);
+            sessionStorage.setItem('type', response.data.user['type']);
             router.push('/');
         } else {
-            // Este bloco é para logins que retornam 200, mas sem o token
-            alert('Falha no login: Resposta inesperada.');
+            toast.add({ severity: 'warn', summary: 'Atenção', detail: 'Falha no login, por favor cheque suas credenciais.', life: 3000 });
         }
     } catch (error) {
+        // ... (Seu tratamento de erro seguro já está bom aqui)
         console.error('Erro ao fazer login:', error);
-
-        // 💡 CORREÇÃO DE ERRO NO CATCH: Acessa a mensagem do erro HTTP (se existir) de forma segura
         const apiMessage = error.response?.data?.message;
 
         if (apiMessage) {
-            alert(apiMessage);
+            toast.add({ severity: 'warn', summary: 'Atenção', detail: 'Falha no login, por favor cheque suas credenciais.', life: 3000 });
         } else {
-            // Para erros de rede, timeout, ou quando error.response é indefinido
-            alert('Falha na comunicação com o servidor. Tente novamente.');
+            toast.add({ severity: 'error', summary: 'Atenção', detail: 'Falha em se comunicar com servidor.', life: 3000 });
         }
     }
 };
 </script>
 
 <template>
+    <Toast />
     <FloatingConfigurator />
     <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
         <div class="flex flex-col items-center justify-center">
             <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                    <div class="text-center mb-8">
-                        <!-- Logo -->
-                        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-8 w-16 shrink-0 mx-auto">
-                            <!-- ... mantive seu svg -->
-                        </svg>
+                    <div class="text-center mb-8 flex flex-col items-center justify-center">
+                        <img v-if="isDarkTheme" src="/logo_fit_b.svg" class="h-20 w-auto mb-4" />
+                        <img v-else src="/logo_fit_p.svg" class="h-20 w-auto mb-4" />
                         <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to FIT 2K25!</div>
                         <span class="text-muted-color font-medium">Sign in to continue</span>
                     </div>

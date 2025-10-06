@@ -1,4 +1,5 @@
 <script setup>
+import { useLayout } from '@/layout/composables/layout';
 import userService from '@/service/UserService';
 import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
@@ -11,6 +12,8 @@ import Toast from 'primevue/toast';
 
 const router = useRouter();
 const toast = useToast();
+
+const { isDarkTheme } = useLayout();
 
 const formData = ref({
     name: '',
@@ -51,12 +54,14 @@ const register = async () => {
     <Toast />
     <FloatingConfigurator />
     <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
-        <div class="md:w-8/12 lg:w-6/12 mx-auto">
-            <div class="w-full bg-surface-0 dark:bg-surface-900 py-5 px-5 sm:px-5" style="border-radius: 53px">
-                <div class="card p-fluid">
-                    <div class="text-center mb-8">
-                        <div class="font-semibold text-xl text-center mb-4">Cadastro</div>
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-full bg-surface-0 dark:bg-surface-900 py-5 px-5 sm:px-5" style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
+                    <div class="text-center mb-8 flex flex-col items-center justify-center">
+                        <img v-if="isDarkTheme" src="/logo_fit_b.svg" class="h-20 w-auto mb-4" />
+                        <img v-else src="/logo_fit_p.svg" class="h-20 w-auto mb-4" />
                         <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to FIT 2K25!</div>
+                        <span class="text-muted-color font-medium">Cadastre-se para continuar</span>
                     </div>
 
                     <form @submit.prevent="register" class="flex flex-col gap-6">
@@ -83,7 +88,7 @@ const register = async () => {
 
                         <div class="field">
                             <label for="senha" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Senha</label>
-                            <Password id="senha" type="password" :toggleMask="true" class="mb-4" fluid :feedback="false" v-model="formData.password" />
+                            <Password id="senha" type="password" :toggleMask="true" class="mb-4" fluid v-model="formData.password" />
                         </div>
                         <div class="field">
                             <Button type="submit" label="Criar conta" class="w-full mt-4" :loading="isLoading" />
@@ -105,5 +110,15 @@ const register = async () => {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.pi-eye {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+
+.pi-eye-slash {
+    transform: scale(1.6);
+    margin-right: 1rem;
 }
 </style>
