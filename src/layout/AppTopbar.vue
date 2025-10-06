@@ -1,7 +1,24 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
+import userService from '@/service/UserService';
+import { useRouter } from 'vue-router';
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+const router = useRouter();
+
+async function logout() {
+    try {
+        await userService.logout();
+    } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+    } finally {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('type');
+
+        router.push('/login');
+    }
+}
+
 </script>
 
 <template>
@@ -37,6 +54,7 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-user"></i>
                         <span>Profile</span>
                     </router-link>
+                    <Button icon="pi pi-sign-out" severity="danger" variant="text" rounded aria-label="logout" @click="logout"/>
                 </div>
             </div>
         </div>
