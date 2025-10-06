@@ -277,6 +277,11 @@ async function submitForm() {
     if (form.value.description) payload.append('description', form.value.description);
     if (form.value.image instanceof File) payload.append('image', form.value.image);
 
+    // Adiciona o método `_method` para o Laravel entender que é uma requisição PUT/PATCH
+    if (form.value.id) {
+        payload.append('_method', 'PUT');
+    }
+
     try {
         if (form.value.id) {
             await EventService.update(form.value.id, payload);
