@@ -4,6 +4,7 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, ref } from 'vue';
 
 import AppConfigurator from '@/layout/AppConfigurator.vue';
+import UserService from '@/service/UserService';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -11,20 +12,13 @@ import ConfirmDialog from 'primevue/confirmdialog';
 import Divider from 'primevue/divider';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
-import Tag from 'primevue/tag';
 import Toast from 'primevue/toast';
 
 const toast = useToast();
 const confirm = useConfirm();
 
-const user = ref({
-    id: 1,
-    name: 'Ada Lovelace',
-    email: 'ada.lovelace@example.com',
-    escola: 'Universidade da Computação',
-    role: 'Admin',
-    avatarUrl: null
-});
+const user = ref({});
+const error = ref(null);
 
 const userInitial = computed(() => user.value?.name?.charAt(0).toUpperCase() || '?');
 const colors = ['#4CAF50', '#E91E63', '#9C27B0', '#2196F3', '#FF5722', '#FFC107'];
@@ -35,7 +29,7 @@ const getColorForName = (name) => {
 };
 
 const isEditing = ref(false);
-const isLoading = ref(true);
+const isLoading = ref(false);
 const isSaving = ref(false);
 const editableUser = ref({});
 const passwordFields = ref({
@@ -44,10 +38,22 @@ const passwordFields = ref({
     password_confirmation: ''
 });
 
-onMounted(() => {
-    setTimeout(() => {
+const fetchPerfil = async () => {
+    isLoading.value = true;
+    error.value = null;
+    try {
+        const response = await UserService.perfil();
+        user.value = response.data;
+    } catch (err) {
+        console.error('Falha ao buscar perfil:', err);
+        error.value = 'Não foi possível carregar o perfil.';
+    } finally {
         isLoading.value = false;
-    }, 800);
+    }
+};
+
+onMounted(() => {
+    fetchPerfil();
 });
 
 const startEditing = () => {
@@ -113,7 +119,7 @@ const changePassword = () => {
 
                     <div v-if="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <div class="field">
-                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">Nome Completo</label>
+                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">Nome</label>
                             <span class="text-lg text-surface-800 dark:text-surface-0">{{ user.name }}</span>
                         </div>
                         <div class="field">
@@ -125,8 +131,8 @@ const changePassword = () => {
                             <span class="text-lg text-surface-800 dark:text-surface-0">{{ user.escola }}</span>
                         </div>
                         <div class="field">
-                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">Cargo</label>
-                            <Tag :value="user.role" severity="info" />
+                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">Indentificador</label>
+                            <span class="text-lg text-surface-800 dark:text-surface-0">{{ user.indentifield }}</span>
                         </div>
                     </div>
 
@@ -144,6 +150,10 @@ const changePassword = () => {
                             <div class="field">
                                 <label for="escola" class="font-semibold">Escola</label>
                                 <InputText id="escola" v-model="editableUser.escola" class="w-full mt-2" />
+                            </div>
+                            <div class="field">
+                                <label for="indentifield" class="font-semibold">Indentificador</label>
+                                <InputText id="indentifield" v-model="editableUser.indentifield" class="w-full mt-2" />
                             </div>
                         </div>
                         <div class="flex justify-end mt-6 gap-2">

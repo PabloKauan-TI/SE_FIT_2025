@@ -7,6 +7,9 @@ export default {
     get(id) {
         return api.get(`/users/${id}`);
     },
+    perfil() {
+        return api.get(`/perfil`);
+    },
     create(data) {
         return api.post('/users', data);
     },
