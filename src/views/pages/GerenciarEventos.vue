@@ -50,18 +50,19 @@
                 </div>
             </template>
 
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false" />
-            <Column field="id" header="ID" sortable style="min-width: 8rem" />
-            <Column field="name" header="Nome" sortable style="min-width: 16rem" />
-            <Column field="date" header="Data" sortable style="min-width: 12rem">
+            <Column field="nome" header="Nome" sortable style="min-width: 16rem" />
+            <Column field="palestrante" header="Palestrante" sortable style="min-width: 16rem" />
+            <Column field="data" header="Data" sortable style="min-width: 12rem">
                 <template #body="slotProps">
-                    {{ formatDate(slotProps.data.date) }}
+                    {{ formatDate(slotProps.data.data) }}
                 </template>
             </Column>
             <Column field="location" header="Local" sortable style="min-width: 14rem" />
+            <Column field="limite" header="Limite" sortable style="min-width: 8rem" />
             <Column header="Ações" style="min-width: 14rem" :exportable="false">
                 <template #body="slotProps">
-                    <Button icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" @click="onEdit(slotProps.data)" />
+                    <Button icon="pi pi-pencil" variant="outlined" rounded class="mr-2" @click="onEdit(slotProps.data)" />
+                    <Button icon="pi pi-trash" variant="outlined" rounded severity="danger" @click="confirmDeleteEvent(slotProps.data)" />
                 </template>
             </Column>
         </DataTable>
@@ -120,6 +121,14 @@
                         <Textarea v-model.trim="form.description" rows="4" placeholder="Escreva uma breve descrição do evento..." class="w-full" />
                     </div>
 
+                    <div class="col-12">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-users text-gray-600"></i>
+                            Limite
+                        </label>
+                        <InputText v-model.trim="form.limit" placeholder="Ex: Auditório Central" class="w-full" />
+                    </div>
+
                     <!-- Upload de Imagem -->
                     <div class="col-12">
                         <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
@@ -174,6 +183,7 @@ const form = ref({
     date: '',
     time: '',
     location: '',
+    limit: '',
     description: '',
     image: null,
     imagePreview: ''

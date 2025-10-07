@@ -23,7 +23,7 @@ const Login = async () => {
         if (response.data && response.data.token) {
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('type', response.data.user['type']);
-            router.push('/');
+            router.push('/dashboard');
         } else {
             toast.add({ severity: 'warn', summary: 'Atenção', detail: 'Falha no login, por favor cheque suas credenciais.', life: 3000 });
         }

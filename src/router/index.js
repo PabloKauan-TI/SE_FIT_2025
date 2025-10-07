@@ -5,11 +5,11 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: '/',
+            path: '/eventos',
             component: AppLayout,
             children: [
                 {
-                    path: '/',
+                    path: '/dashboard',
                     name: 'dashboard',
                     component: () => import('@/views/Dashboard.vue')
                 },
@@ -61,7 +61,7 @@ const router = createRouter({
             component: () => import('@/views/pages/CadastrarUsuario.vue')
         },
         {
-            path: '/landing',
+            path: '/',
             name: 'landing',
             component: () => import('@/views/pages/Landing.vue')
         },
@@ -71,7 +71,7 @@ const router = createRouter({
             component: () => import('@/views/pages/NotFound.vue')
         },
         {
-            path: '/auth/login',
+            path: '/login',
             name: 'login',
             component: () => import('@/views/pages/auth/Login.vue')
         },
