@@ -36,7 +36,7 @@ export default {
         // A sua rota de backend para update é: Route::post('/eventos/{id}', ...)
         // O campo `_method: 'PUT'` já está no FormData, e o Axios vai lidar com o Content-Type.
         // A rota está correta (/eventos/{id}).
-        return api.post(`/eventos/${id}`, data);
+        return api.post(`/events/${id}`, data);
     },
 
     /**
