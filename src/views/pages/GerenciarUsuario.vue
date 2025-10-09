@@ -1,7 +1,7 @@
 <script setup>
 import AppTopbar from '@/layout/AppTopbar.vue';
 import UserService from '@/service/UserService.js';
-import { Toolbar } from 'primevue';
+import Toolbar from 'primevue/toolbar';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
 
@@ -19,10 +19,9 @@ import Toast from 'primevue/toast';
 import { useConfirm } from 'primevue/useconfirm';
 
 const dt = ref();
-const users = ref();
+const users = ref([]);
 const selectedUsers = ref([]);
 const confirm = useConfirm();
-const deleteUserDialog = ref(false);
 const submitted = ref(false);
 const userDialog = ref(false);
 const user = ref({});
@@ -36,7 +35,7 @@ onMounted(() => {
 });
 
 function openNew() {
-    user.value = {};
+    user.value = { type: 'client' };
     submitted.value = false;
     userDialog.value = true;
 }
@@ -47,7 +46,7 @@ function hideDialog() {
 }
 
 function exportCSV() {
-    dt.value.exportCSV();
+    if (dt.value && users.value?.length) dt.value.exportCSV();
 }
 
 const filters = ref({
@@ -70,26 +69,33 @@ const fetchUsers = async () => {
 
 const saveUser = async () => {
     submitted.value = true;
-    if (!user.value.name || !user.value.email) {
-        return;
-    }
+
+    if (!user.value.name || !user.value.email) return;
+
+    isSaving.value = true;
 
     try {
+        const payload = { ...user.value };
+        if (!payload.password) delete payload.password;
+
+        let response;
         if (user.value.id) {
-            const response = await UserService.update(user.value.id, user.value);
-            const index = users.value.findIndex((u) => u.id === user.value.id);
-            users.value[index] = response.data;
+            response = await UserService.update(user.value.id, payload);
+            users.value = users.value.map((u) => (u.id === user.value.id ? response.data : u));
             toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário atualizado!', life: 3000 });
         } else {
-            const response = await UserService.create(user.value);
+            response = await UserService.create(payload);
             users.value.push(response.data);
             toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário criado!', life: 3000 });
         }
+
         userDialog.value = false;
         user.value = {};
     } catch (err) {
         console.error('Erro ao salvar usuário:', err);
         toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível salvar o usuário.', life: 3000 });
+    } finally {
+        isSaving.value = false;
     }
 };
 
@@ -97,7 +103,6 @@ const deleteUser = async () => {
     try {
         await UserService.delete(user.value.id);
         users.value = users.value.filter((val) => val.id !== user.value.id);
-        deleteUserDialog.value = false;
         user.value = {};
         toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário deletado!', life: 3000 });
     } catch (err) {
@@ -197,7 +202,7 @@ function editUser(userToEdit) {
         </DataTable>
     </div>
 
-    <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" header="Cadastro" :modal="true">
+    <Dialog v-model:visible="userDialog" :style="{ width: '450px' }" :header="user.id ? 'Editar Usuário' : 'Novo Usuário'" :modal="true">
         <div class="flex flex-col gap-6">
             <div>
                 <label for="name" class="block font-bold mb-3">Nome</label>
@@ -216,15 +221,15 @@ function editUser(userToEdit) {
                 <label for="indentifield" class="block font-bold mb-3">Identificação</label>
                 <InputText id="indentifield" v-model="user.indentifield" :required="true" rows="3" cols="20" fluid />
             </div>
-            <div>
+            <div v-if="!user.id">
                 <label for="password" class="block font-bold mb-3">Senha</label>
-                <Password id="password" type="password" :required="true" :toggleMask="true" class="mb-4" fluid :feedback="false" v-model="user.password" />
+                <Password id="password" v-model="user.password" toggleMask fluid :feedback="false" />
             </div>
         </div>
 
         <template #footer>
-            <Button label="Cancel" icon="pi pi-times" text @click="hideDialog" />
-            <Button label="Save" icon="pi pi-check" @click="saveUser" :loading="isSaving" />
+            <Button label="Salvar" icon="pi pi-check" @click="saveUser" :loading="isSaving" />
+            <Button label="Cancelar" icon="pi pi-times" text @click="hideDialog" />
         </template>
     </Dialog>
 </template>
