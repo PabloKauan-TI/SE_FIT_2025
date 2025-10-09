@@ -265,6 +265,7 @@ function onSearchInput() {
         </div>
 
         <DataTable
+            v-else
             ref="dt"
             :value="events"
             dataKey="id"

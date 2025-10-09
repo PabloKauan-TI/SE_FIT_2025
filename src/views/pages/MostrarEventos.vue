@@ -99,7 +99,7 @@ onMounted(async () => {
         <div v-else class="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6">
             <Card v-for="event in events" :key="event.id" class="shadow-lg hover:shadow-xl transition-all duration-300 border-round-lg">
                 <template #header>
-                    <img :src="event.imagem" :alt="event.nome" class="w-full h-48 object-cover rounded-t-xl" @error="(e) => (e.target.src = 'https://primefaces.org/cdn/primevue/images/product/product-placeholder.svg')" />
+                    <img :src="event.imagem" :alt="event.nome" class="w-full h-[300px] rounded-t-xl" @error="(e) => (e.target.src = 'https://primefaces.org/cdn/primevue/images/product/product-placeholder.svg')" />
                 </template>
 
                 <template #title>
@@ -114,7 +114,6 @@ onMounted(async () => {
                 </template>
 
                 <template #content>
-                    <p class="line-clamp-2 text-sm text-gray-600 mb-3">{{ event.description }}</p>
                     <div class="flex justify-between text-xs text-gray-500">
                         <span> <i class="pi pi-user mr-1"></i>{{ event.palestrante }} </span>
                         <span> <i class="pi pi-users mr-1"></i>{{ event.limite }} vagas </span>

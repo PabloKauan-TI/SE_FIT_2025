@@ -20,5 +20,6 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
-    }
+    },
+    API_BASE_URL: 'loaclhost:8000/'
 });
