@@ -49,11 +49,23 @@ const openDetails = (event) => {
 const formatDate = (date) => {
     if (!date) return 'Data a definir';
     try {
-        return new Date(date).toLocaleDateString('pt-BR', {
+        const [datePart, timePart] = date.split(' ');
+        const [day, month, year] = datePart.split('/');
+        const isoDateString = `${year}-${month}-${day}T${timePart}`;
+        const dateObject = new Date(isoDateString);
+
+        const formattedDate = dateObject.toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: 'long',
             year: 'numeric'
         });
+        const formattedTime = dateObject.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+
+        return `${formattedDate} às ${formattedTime}`;
     } catch {
         return 'Data inválida';
     }

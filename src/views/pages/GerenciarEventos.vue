@@ -220,15 +220,6 @@ function exportCSV() {
     dt.value && dt.value.exportCSV();
 }
 
-function formatDate(value) {
-    if (!value) return '';
-    try {
-        return new Date(value).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-    } catch {
-        return value;
-    }
-}
-
 // (opcional) busca simples por nome — só filtra localmente
 function onSearchInput() {
     const q = search.value?.toLowerCase?.() ?? '';
@@ -291,7 +282,7 @@ function onSearchInput() {
             <Column field="palestrante" header="Palestrante" sortable style="min-width: 12rem" />
             <Column field="data" header="Data" sortable style="min-width: 12rem">
                 <template #body="slotProps">
-                    {{ formatDate(slotProps.data.data) }}
+                    {{ slotProps.data.data }}
                 </template>
             </Column>
             <Column field="location" header="Local" sortable style="min-width: 14rem" />
