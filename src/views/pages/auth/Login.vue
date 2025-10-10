@@ -66,6 +66,10 @@ const Login = async () => {
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
                         <Button label="Sign In" class="w-full" @click="Login" />
+                        <p class="mt-4 text-center">
+                            Não possui uma conta?
+                            <RouterLink to="/pages/cadastrar-usuario" class="text-primary-600 hover:underline font-medium">Cadastre-se</RouterLink>
+                        </p>
                     </div>
                 </div>
             </div>

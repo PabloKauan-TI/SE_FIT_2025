@@ -14,10 +14,10 @@ export default {
     },
 
     store(id) {
-        return api.post('/check', id);
+        return api.post('/check/store', id);
     },
 
     destroy(number) {
-        return api.delete(`/events/${number}`);
+        return api.delete(`/check/apagar/${number}`);
     }
 };

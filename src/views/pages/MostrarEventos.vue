@@ -1,6 +1,7 @@
 <script setup>
 import EventService from '@/service/EventService';
-import { Image } from 'primevue';
+import RegEvent from '@/service/RegEvent';
+import { Image, useToast } from 'primevue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -10,6 +11,7 @@ const events = ref([]);
 const loading = ref(true);
 const selectedEvent = ref(null);
 const selectedEventVisible = ref(false);
+const toast = useToast();
 
 const normalizeEvent = (event) => {
     if (!event) return null;
@@ -71,7 +73,18 @@ const formatDate = (date) => {
     }
 };
 
-onMounted(async () => {
+const inscribe = async (data) => {
+    try {
+        const response = await RegEvent.store(data);
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Incrição Efetuado!', life: 3000 });
+        allEvents();
+    } catch (err) {
+        console.error('Erro ao deletar usuário:', err);
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível efetuar a incrição.', life: 3000 });
+    }
+};
+
+const allEvents = async () => {
     try {
         const response = await EventService.getAll();
         const eventData = response.data;
@@ -84,15 +97,19 @@ onMounted(async () => {
         }
         events.value = eventList;
     } catch (error) {
-        console.error('Erro ao carregar dados:', error);
         events.value = [];
     } finally {
         loading.value = false;
     }
+};
+
+onMounted(async () => {
+    allEvents();
 });
 </script>
 
 <template>
+    <Toast />
     <div class="p-4">
         <!-- Loader -->
         <div v-if="loading" class="flex justify-center items-center h-48">
@@ -170,7 +187,7 @@ onMounted(async () => {
                 </div>
 
                 <div class="pt-4 flex justify-end">
-                    <button class="p-button p-component p-button-primary" @click="handleRegistration(selectedEvent)">
+                    <button class="p-button p-component p-button-primary" @click="inscribe((data = { event_id: selectedEvent.id }))">
                         <span class="p-button-icon p-c pi pi-check"></span>
                         <span class="p-button-label p-c">Inscrever-se</span>
                     </button>

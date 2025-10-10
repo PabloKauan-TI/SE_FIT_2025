@@ -97,7 +97,7 @@ const register = async () => {
 
                     <p class="mt-4 text-center">
                         Já possui uma conta?
-                        <router-link to="/auth/login" class="text-primary-600 hover:underline font-medium">Entrar</router-link>
+                        <router-link to="/login" class="text-primary-600 hover:underline font-medium">Entrar</router-link>
                     </p>
                 </div>
             </div>
