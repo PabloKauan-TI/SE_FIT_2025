@@ -1,5 +1,6 @@
 <script setup>
 import EventService from '@/service/EventService';
+import { Image } from 'primevue';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import Dialog from 'primevue/dialog';
@@ -140,7 +141,9 @@ onMounted(async () => {
         <!-- Modal de detalhes -->
         <Dialog v-model:visible="selectedEventVisible" modal :header="selectedEvent ? selectedEvent.nome : 'Detalhes do Evento'" class="w-11/12 md:w-1/2 lg:w-2/5" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
             <div v-if="selectedEvent" class="flex flex-col gap-4">
-                <img :src="selectedEvent.imagem" :alt="selectedEvent.nome" class="w-full h-60 object-cover rounded-lg" @error="(e) => (e.target.src = 'https://primefaces.org/cdn/primevue/images/product/product-placeholder.svg')" />
+                <div class="flex justify-center">
+                    <Image :src="selectedEvent.imagem" :alt="selectedEvent.nome" />
+                </div>
 
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div class="flex items-center gap-2">
@@ -164,6 +167,13 @@ onMounted(async () => {
                 <div>
                     <h4 class="font-semibold mb-2">Descrição</h4>
                     <p class="text-justify text-gray-700">{{ selectedEvent.description }}</p>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button class="p-button p-component p-button-primary" @click="handleRegistration(selectedEvent)">
+                        <span class="p-button-icon p-c pi pi-check"></span>
+                        <span class="p-button-label p-c">Inscrever-se</span>
+                    </button>
                 </div>
             </div>
         </Dialog>
