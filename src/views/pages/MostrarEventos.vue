@@ -142,7 +142,7 @@ onMounted(async () => {
         <Dialog v-model:visible="selectedEventVisible" modal :header="selectedEvent ? selectedEvent.nome : 'Detalhes do Evento'" class="w-11/12 md:w-1/2 lg:w-2/5" :breakpoints="{ '960px': '75vw', '641px': '90vw' }">
             <div v-if="selectedEvent" class="flex flex-col gap-4">
                 <div class="flex justify-center">
-                    <Image :src="selectedEvent.imagem" :alt="selectedEvent.nome" />
+                    <Image :src="selectedEvent.imagem" :alt="selectedEvent.nome" preview />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4 text-sm">
