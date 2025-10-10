@@ -12,8 +12,11 @@ const adminMenu = [
         items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/dashboard' }]
     },
     {
-        label: 'Conta',
-        items: [{ label: 'Meus Ingressos', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }]
+        label: 'Tickets',
+        items: [
+            { label: 'Meus Tickets', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } },
+            { label: 'Checar Tickets', icon: 'pi pi-qrcode', to: '/scan_ticket' }
+        ]
     },
     {
         label: 'Users',

@@ -1,8 +1,8 @@
 <script setup>
 import EventService from '@/service/EventService';
-import Button from 'primevue/button'; // Importação padrão
-import Card from 'primevue/card'; // Importação padrão
-import Dialog from 'primevue/dialog'; // Importação padrão
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import Dialog from 'primevue/dialog';
 import { onMounted, ref } from 'vue';
 
 const events = ref([]);
@@ -10,13 +10,12 @@ const loading = ref(true);
 const selectedEvent = ref(null);
 const selectedEventVisible = ref(false);
 
-// Função para normalizar os dados dos eventos
 const normalizeEvent = (event) => {
     if (!event) return null;
 
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    let imageUrl = 'https://primefaces.org/cdn/primevue/images/product/product-placeholder.svg'; // Imagem padrão
+    let imageUrl = 'https://primefaces.org/cdn/primevue/images/product/product-placeholder.svg';
     const rawImage = event.imagem || event.image || event.foto || event.imagem_url;
 
     if (rawImage) {

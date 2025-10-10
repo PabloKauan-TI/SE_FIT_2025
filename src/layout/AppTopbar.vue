@@ -52,9 +52,13 @@ async function logout() {
                 <div class="layout-topbar-menu-content">
                     <router-link to="/pages/perfil-usuario" class="layout-topbar-action">
                         <i class="pi pi-user"></i>
-                        <span>Profile</span>
+                        <span>Perfil</span>
                     </router-link>
-                    <Button icon="pi pi-sign-out" severity="danger" variant="text" rounded aria-label="logout" @click="logout"/>
+                    <div class="layout-topbar-action" @click="logout">
+                        <i class="pi pi-sign-out" style="color: red"></i>
+                        <span>Sair</span>
+                    </div>
+                    
                 </div>
             </div>
         </div>
