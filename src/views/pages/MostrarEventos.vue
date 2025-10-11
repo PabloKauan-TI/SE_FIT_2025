@@ -29,8 +29,6 @@ const normalizeEvent = (event) => {
         }
     }
 
-    console.log('URL da imagem gerada:', imageUrl);
-
     return {
         id: event.id || Math.random(),
         nome: event.nome || event.name || 'Evento sem nome',
