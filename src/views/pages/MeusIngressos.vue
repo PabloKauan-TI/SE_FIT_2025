@@ -3,11 +3,12 @@ import RegEvent from '@/service/RegEvent';
 import { useToast } from 'primevue';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import { nextTick, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const tickets = ref([]);
 const isBarcodeVisible = ref(false);
 const selectedBarcode = ref('');
+const barcodeImageUrl = ref('');
 const barcodeSvgRef = ref(null);
 const toast = useToast();
 
@@ -37,27 +38,28 @@ const formatDate = (dateString) => {
     });
 };
 
-// Gera e exibe o código de barras
 const gerarBarCode = async (codigo) => {
+    isBarcodeVisible.value = false;
+    barcodeImageUrl.value = '';
+
     try {
-        selectedBarcode.value = codigo;
         isBarcodeVisible.value = true;
+        selectedBarcode.value = codigo;
 
-        await nextTick();
+        const response = await RegEvent.show(codigo);
 
-        const svg = barcodeSvgRef.value;
-        if (svg) {
-            svg.innerHTML = '';
-            window.JsBarcode(svg, String(codigo), {
-                format: 'CODE128',
-                lineColor: '#000',
-                width: 2,
-                height: 100,
-                displayValue: true
-            });
-        }
+        const imageUrl = `data:image/png;base64,${response.data.barcode_image}`;
+
+        barcodeImageUrl.value = imageUrl;
     } catch (err) {
-        console.error('Erro ao gerar código de barras:', err);
+        console.error('Erro ao buscar o código de barras:', err);
+        isBarcodeVisible.value = false;
+        toast.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Não foi possível carregar o código de barras.',
+            life: 3000
+        });
     }
 };
 
@@ -149,9 +151,10 @@ const confirmarExclusao = async () => {
         <!-- Dialog com o código de barras -->
         <Dialog v-model:visible="isBarcodeVisible" header="Código de Barras" modal :style="{ width: '350px' }">
             <div class="flex flex-col items-center gap-3">
-                <svg ref="barcodeSvgRef" id="barcode"></svg>
+                <img v-if="barcodeImageUrl" :src="barcodeImageUrl" alt="Código de Barras" />
+                <ProgressSpinner v-else style="width: 50px; height: 50px" strokeWidth="8" fill="transparent" animationDuration=".5s" aria-label="Custom ProgressSpinner" />
 
-                <Button label="Baixar código de barras" icon="pi pi-download" class="w-full" @click="baixarBarCode" />
+                <Button label="Baixar código de barras" icon="pi pi-download" class="w-full" @click="baixarBarCode" :disabled="!barcodeImageUrl" />
             </div>
         </Dialog>
 

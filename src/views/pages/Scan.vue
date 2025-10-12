@@ -1,72 +1,77 @@
 <template>
-    <div id="barcode-page">
-        <header>
-            <h1>Leitor de Código de Barras</h1>
-            <p>Escolha como deseja inserir o código do produto.</p>
-        </header>
-
-        <main>
-            <div class="input-mode-selector">
-                <button @click="setMode('scan')" :class="{ active: mode === 'scan' }">Escanear com a Câmera</button>
-                <button @click="setMode('manual')" :class="{ active: mode === 'manual' }">Digitar Manualmente</button>
+    <div id="barcode-page" class="p-4 flex flex-col items-center gap-6">
+        <div class="manual-input-area w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-3 text-center">Inserir Código Manualmente</h2>
+            <div class="flex gap-2">
+                <InputText type="text" v-model="manualCode" placeholder="Digite o código de barras/QR" class="flex-grow" :disabled="isSending" @keyup.enter="submitManualCode" />
+                <Button @click="submitManualCode" :icon="isSending ? 'pi pi-spin pi-spinner' : 'pi pi-check'" :label="isSending ? 'Enviando...' : 'Enviar'" :loading="isSending" :disabled="isSending || manualCode.trim() === ''" />
             </div>
+        </div>
 
-            <div class="reader-area">
-                <div v-if="mode === 'scan'" class="scanner-container">
-                    <StreamQrcodeBarcodeReader @result="onScanSuccess" @loading="onLoading" @error="onScanError"></StreamQrcodeBarcodeReader>
-                    <div v-if="isLoading" class="loading-indicator">Iniciando câmera...</div>
-                    <div v-if="scanError" class="error-message">
-                        {{ scanError }}
-                    </div>
+        <Divider align="center">
+            <b>OU</b>
+        </Divider>
+
+        <div class="scanner-area w-full max-w-md">
+            <h2 class="text-lg font-semibold mb-3 text-center">Escanear com a Câmera</h2>
+            <div class="scanner-container border p-2 rounded shadow-lg">
+                <StreamQrcodeBarcodeReader v-if="isScanning" @result="onScanSuccess" @loading="onLoading">
+                    <div v-if="!isLoading" class="text-center p-4 text-gray-500">Aguardando código...</div>
+                </StreamQrcodeBarcodeReader>
+
+                <div v-if="isLoading" class="loading-indicator absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center">
+                    <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" aria-label="Carregando" />
+                    <p class="ml-3">Iniciando câmera...</p>
                 </div>
 
-                <div v-if="mode === 'manual'" class="manual-input-container">
-                    <form @submit.prevent="submitManualCode">
-                        <input type="text" v-model="manualCode" placeholder="Digite o código de barras" class="manual-input" />
-                        <button type="submit" class="submit-button">Enviar</button>
-                    </form>
+                <div v-if="!isScanning && !isLoading" class="text-center p-8 text-lg text-gray-700">
+                    Código capturado.
+                    <Button label="Escanear Novamente" icon="pi pi-refresh" class="mt-3 p-button-outlined" @click="resetScanner" />
                 </div>
             </div>
+        </div>
 
-            <div v-if="finalCode" class="result-container">
-                <h3>Código Identificado:</h3>
-                <p class="result-code">{{ finalCode }}</p>
-            </div>
-        </main>
+        <div v-if="finalCode" :class="[isSending ? 'bg-blue-100 border-blue-500' : 'bg-green-100 border-green-500']" class="mt-4 p-3 border-l-4 text-gray-700 w-full max-w-md text-center rounded">
+            Status: <b>{{ statusMessage }}</b>
+            <div v-if="finalCode" class="mt-1 text-sm">Código: {{ finalCode }}</div>
+        </div>
     </div>
 </template>
 
 <script setup>
+import RegEvent from '@/service/RegEvent';
+import { Button, Divider, InputText, ProgressSpinner } from 'primevue';
 import { ref } from 'vue';
 import { StreamQrcodeBarcodeReader } from 'vue3-barcode-qrcode-reader';
 
-// Estado para controlar o modo de entrada ('scan' ou 'manual')
-const mode = ref('scan'); // Inicia no modo de escaneamento por padrão
-
-// Estado para o modo manual
 const manualCode = ref('');
-
-// Estado para o modo de scanner
 const isLoading = ref(false);
-const scanError = ref('');
-
-// Estado para armazenar o resultado final
+const isScanning = ref(true);
+const isSending = ref(false);
 const finalCode = ref('');
+const statusMessage = ref('Aguardando entrada...');
 
-// Funções de controle
-const setMode = (selectedMode) => {
-    mode.value = selectedMode;
-    // Limpa o resultado anterior ao trocar de modo
-    finalCode.value = '';
-    scanError.value = '';
+const sendCodeToServer = async (code) => {
+    isSending.value = true;
+    statusMessage.value = `Enviando código: ${code}...`;
+
+    await RegEvent.confirm(code);
+
+    isSending.value = false;
+    statusMessage.value = `Ticket ${code} confirmado com SUCESSO! ✅`;
+
+    return { success: true, message: 'Ticket Confirmado' };
 };
 
-// Funções para o Scanner
 const onScanSuccess = (result) => {
-    if (result && result.text) {
+    if (result && result.text && isScanning.value && !isSending.value) {
+        isScanning.value = false;
+
         finalCode.value = result.text;
-        // Opcional: parar a câmera após a leitura (neste caso, trocamos o modo)
-        // mode.value = 'manual';
+
+        (async () => {
+            await sendCodeToServer(result.text);
+        })();
     }
 };
 
@@ -74,163 +79,42 @@ const onLoading = (loadingState) => {
     isLoading.value = loadingState;
 };
 
-const onScanError = (error) => {
-    if (error.name === 'NotAllowedError') {
-        scanError.value = 'Você precisa conceder permissão para acessar a câmera.';
-    } else {
-        scanError.value = `Erro na câmera: ${error.message}`;
+const submitManualCode = () => {
+    const code = manualCode.value.trim();
+    if (code !== '' && !isSending.value) {
+        isScanning.value = false;
+
+        finalCode.value = code;
+        manualCode.value = '';
+        (async () => {
+            await sendCodeToServer(code);
+        })();
     }
 };
 
-// Função para o modo manual
-const submitManualCode = () => {
-    if (manualCode.value.trim() !== '') {
-        finalCode.value = manualCode.value.trim();
-        manualCode.value = ''; // Limpa o campo após o envio
-    }
+const resetScanner = () => {
+    finalCode.value = '';
+    manualCode.value = '';
+    isSending.value = false;
+    isScanning.value = true;
+    statusMessage.value = 'Pronto para escanear ou inserir código.';
 };
 </script>
 
-<style>
-/* Estilos Globais */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f7f9;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-}
-
-#barcode-page {
-    max-width: 800px;
-    margin: 0 auto;
-    text-align: center;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-}
-
-header h1 {
-    color: #2c3e50;
-}
-
-/* Seletor de Modo */
-.input-mode-selector {
-    margin: 2rem 0;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.input-mode-selector button {
-    padding: 12px 24px;
-    border: 2px solid transparent;
-    background-color: #e9ecef;
-    color: #495057;
-    border-radius: 50px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.input-mode-selector button:hover {
-    background-color: #dee2e6;
-}
-
-.input-mode-selector button.active {
-    background-color: #007bff;
-    color: #fff;
-    border-color: #007bff;
-}
-
-/* Área do Leitor */
-.reader-area {
-    min-height: 350px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    overflow: hidden; /* Garante que o vídeo não ultrapasse as bordas */
-    position: relative;
-}
-
+<style scoped>
 .scanner-container {
-    width: 100%;
-    height: 100%;
-}
-
-.scanner-container .loading-indicator {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius: 5px;
-}
-
-.scanner-container .error-message {
-    padding: 20px;
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 5px;
-}
-
-/* Modo Manual */
-.manual-input-container form {
+    position: relative;
+    max-height: 350px;
+    max-width: 350px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    width: 80%;
+    justify-content: center;
+    overflow: hidden;
 }
 
-.manual-input {
-    width: 100%;
-    padding: 12px;
-    font-size: 1.2rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.submit-button {
-    padding: 12px 30px;
-    font-size: 16px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.submit-button:hover {
-    background-color: #218838;
-}
-
-/* Área de Resultado */
-.result-container {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background-color: #e3f2fd;
-    border-left: 5px solid #007bff;
-    text-align: left;
-}
-
-.result-container h3 {
-    margin-top: 0;
-    color: #004085;
-}
-
-.result-code {
-    font-size: 1.5rem;
-    font-weight: bold;
-    word-wrap: break-word;
+.loading-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
 }
 </style>
