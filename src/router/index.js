@@ -19,6 +19,11 @@ const router = createRouter({
                     component: () => import('@/views/pages/GerenciarUsuario.vue')
                 },
                 {
+                    path: '/pages/certificados',
+                    name: 'certificados',
+                    component: () => import('@/views/pages/GerenciarCertificados.vue')
+                },
+                {
                     path: '/pages/cadastrar-eventos',
                     name: 'CadastroEventos',
                     component: () => import('@/views/pages/CadastroEventos.vue')

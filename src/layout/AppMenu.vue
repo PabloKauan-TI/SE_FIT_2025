@@ -19,6 +19,10 @@ const adminMenu = [
         ]
     },
     {
+        label: 'Certificados',
+        items: [{ label: 'Ver Certificados', icon: 'pi pi-fw pi-eye', to: '/pages/certificados' }]
+    },
+    {
         label: 'Users',
         items: [{ label: 'Gerenciar', icon: 'pi pi-fw pi-users', to: '/pages/gerenciar-usuario' }]
     },
@@ -39,6 +43,14 @@ const userMenu = [
     {
         label: 'Eventos',
         items: [{ label: 'Ver Eventos', icon: 'pi pi-fw pi-eye', to: { name: 'mostrar-eventos' } }]
+    },
+    {
+        label: 'Tickets',
+        items: [{ label: 'Meus Tickets', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }]
+    },
+    {
+        label: 'Certificados',
+        items: [{ label: 'Ver Certificados', icon: 'pi pi-fw pi-eye', to: '/pages/certificados' }]
     },
     {
         label: 'Conta',

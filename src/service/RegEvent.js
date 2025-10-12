@@ -13,7 +13,7 @@ export default {
         return api.get(`/certificados`);
     },
 
-    gerarCertificado($number) {
+    gerarCertificado(number) {
         return api.get(`/certificado/${number}`);
     },
 
