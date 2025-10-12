@@ -171,11 +171,11 @@ const changePassword = () => {
                                 <Password id="current_password" v-model="passwordFields.current_password" class="w-full mt-2" :feedback="false" toggleMask />
                             </div>
                             <div></div>
-                            <div class="field">
+                            <div class="field col-span-2 md:col-span-1">
                                 <label for="password">Nova Senha</label>
                                 <Password id="password" v-model="passwordFields.password" class="w-full mt-2" toggleMask />
                             </div>
-                            <div class="field">
+                            <div class="field col-span-2 md:col-span-1">
                                 <label for="password_confirmation">Confirmar Nova Senha</label>
                                 <Password id="password_confirmation" v-model="passwordFields.password_confirmation" class="w-full mt-2" :feedback="false" toggleMask />
                             </div>

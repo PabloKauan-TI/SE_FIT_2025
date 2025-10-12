@@ -22,20 +22,53 @@ onMounted(() => {
 const fetchTickets = async () => {
     try {
         const response = await RegEvent.get();
-        tickets.value = response.data;
+
+        let fetchedTickets = response.data;
+
+        const parseDate = (dateString) => {
+            const parts = dateString.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
+
+            const isoDateString = `${parts[2]}/${parts[1]}/${parts[3]} ${parts[4]}:${parts[5]}`;
+
+            return Date.parse(isoDateString);
+        };
+
+        fetchedTickets.sort((a, b) => {
+            const timestampA = parseDate(a.data);
+            const timestampB = parseDate(b.data);
+
+            return timestampB - timestampA;
+        });
+
+        tickets.value = fetchedTickets;
     } catch (error) {
         console.error('Erro ao buscar ingressos:', error);
     }
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'Data a definir';
-    return new Date(dateString).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: 'long',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+const formatDate = (date) => {
+    if (!date) return 'Data a definir';
+    try {
+        const [datePart, timePart] = date.split(' ');
+        const [day, month, year] = datePart.split('/');
+        const isoDateString = `${year}-${month}-${day}T${timePart}`;
+        const dateObject = new Date(isoDateString);
+
+        const formattedDate = dateObject.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+        const formattedTime = dateObject.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+
+        return `${formattedDate} às ${formattedTime}`;
+    } catch {
+        return 'Data inválida';
+    }
 };
 
 const gerarBarCode = async (codigo) => {
@@ -139,8 +172,8 @@ const confirmarExclusao = async () => {
                     </div>
 
                     <div class="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 mt-auto">
-                        <Button label="Gerar Código de Barras" @click="gerarBarCode(ticket.codigo_de_barras)" class="w-full" />
-                        <Button label="Cancelar Ingresso" severity="danger" @click="abrirDialogExclusao(ticket)" class="w-full" />
+                        <Button label="Gerar Código" @click="gerarBarCode(ticket.codigo_de_barras)" class="w-full" />
+                        <Button v-if="!ticket.check" label="Cancelar Ingresso" severity="danger" @click="abrirDialogExclusao(ticket)" class="w-full" />
                     </div>
                 </div>
             </div>
