@@ -39,7 +39,7 @@ const register = async () => {
 
         toast.add({ severity: 'success', summary: 'Sucesso!', detail: 'Conta criada com sucesso. Por favor, faça o login.', life: 3000 });
 
-        router.push('/pages/login');
+        router.push('/');
     } catch (error) {
         console.error('Erro ao criar conta:', error);
         const errorMessage = error.response?.data?.message || 'Não foi possível criar a conta. Tente novamente.';
@@ -53,7 +53,7 @@ const register = async () => {
 <template>
     <Toast />
     <FloatingConfigurator />
-    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
+    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] py-8 md:py-12">
         <div class="flex flex-col items-center justify-center">
             <div class="w-full bg-surface-0 dark:bg-surface-900 py-5 px-5 sm:px-5" style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
@@ -97,7 +97,7 @@ const register = async () => {
 
                     <p class="mt-4 text-center">
                         Já possui uma conta?
-                        <router-link to="/login" class="text-primary-600 hover:underline font-medium">Entrar</router-link>
+                        <router-link to="/" class="text-primary-600 hover:underline font-medium">Entrar</router-link>
                     </p>
                 </div>
             </div>

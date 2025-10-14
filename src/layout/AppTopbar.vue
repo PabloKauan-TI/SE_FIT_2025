@@ -15,7 +15,7 @@ async function logout() {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('type');
 
-        router.push('/login');
+        router.push('/');
     }
 }
 

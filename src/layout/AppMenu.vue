@@ -8,10 +8,6 @@ const userType = sessionStorage.getItem('type');
 
 const adminMenu = [
     {
-        label: 'Home',
-        items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/dashboard' }]
-    },
-    {
         label: 'Tickets',
         items: [
             { label: 'Meus Tickets', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } },
@@ -36,10 +32,6 @@ const adminMenu = [
 ];
 
 const userMenu = [
-    {
-        label: 'Home',
-        items: [{ label: 'Home', icon: 'pi pi-fw pi-home', to: '/dashboard' }]
-    },
     {
         label: 'Eventos',
         items: [{ label: 'Ver Eventos', icon: 'pi pi-fw pi-eye', to: { name: 'mostrar-eventos' } }]
