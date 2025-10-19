@@ -46,7 +46,7 @@ const fetchCertifields = async () => {
 const Gerar = async (data) => {
     try {
         const api2 = Axios.create({
-            baseURL: 'http://localhost:8000/api', // <- baseURL
+            baseURL: 'https://fitufccrateus.com/se/public/api', // <- baseURL
             withCredentials: true,
             responseType: 'blob', // faz a instância esperar blob
             headers: {

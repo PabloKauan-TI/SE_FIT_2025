@@ -111,6 +111,30 @@ const deleteUser = async () => {
     }
 };
 
+const promoverUser = async (userToPromote) => {
+    try {
+        const id = userToPromote.id;
+        await UserService.promover(id);
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário Promovido!', life: 3000 });
+        fetchUsers();
+    } catch (err) {
+        console.error('Erro ao promover usuário:', err);
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível promover o usuário.', life: 3000 });
+    }
+};
+
+const rebaixarUser = async (userToPromote) => {
+    try {
+        const id = userToPromote.id;
+        await UserService.rebaixar(id);
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário Promovido!', life: 3000 });
+        fetchUsers();
+    } catch (err) {
+        console.error('Erro ao promover usuário:', err);
+        toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível promover o usuário.', life: 3000 });
+    }
+};
+
 const confirmDeleteUser = (userToDelete) => {
     user.value = userToDelete;
     confirm.require({
@@ -123,6 +147,38 @@ const confirmDeleteUser = (userToDelete) => {
         rejectLabel: 'Cancelar',
         accept: () => {
             deleteUser();
+        }
+    });
+};
+
+const confirmRebaixarUser = (userToRebaixar) => {
+    const user_r = userToRebaixar;
+    confirm.require({
+        message: 'Você tem certeza que quer rebaixar este usuário?',
+        header: 'Confirmação de Rebaixamento',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-danger p-button-text',
+        acceptClass: 'p-button-text p-button-text',
+        acceptLabel: 'Rebaixar',
+        rejectLabel: 'Cancelar',
+        accept: () => {
+            rebaixarUser(user_r);
+        }
+    });
+};
+
+const confirmPromoteUser = (userToPromote) => {
+    const user_p = userToPromote;
+    confirm.require({
+        message: 'Você tem certeza que quer promover este usuário?',
+        header: 'Confirmação de Promoção',
+        icon: 'pi pi-info-circle',
+        rejectClass: 'p-button-danger p-button-text',
+        acceptClass: 'p-button-text p-button-text',
+        acceptLabel: 'Promover',
+        rejectLabel: 'Cancelar',
+        accept: () => {
+            promoverUser(user_p);
         }
     });
 };
@@ -195,6 +251,8 @@ function editUser(userToEdit) {
             <Column field="indentifield" header="Identificação" sortable style="min-width: 14rem"></Column>
             <Column :exportable="false" style="min-width: 12rem">
                 <template #body="slotProps">
+                    <Button v-if="slotProps.data.type == 'client'" icon="pi pi-angle-double-up" variant="outlined" rounded class="mr-2" @click="confirmPromoteUser(slotProps.data)" />
+                    <Button v-else icon="pi pi-angle-double-down" variant="outlined" rounded class="mr-2" @click="confirmRebaixarUser(slotProps.data)" />
                     <Button icon="pi pi-pencil" variant="outlined" rounded class="mr-2" @click="editUser(slotProps.data)" />
                     <Button icon="pi pi-trash" variant="outlined" rounded severity="danger" @click="confirmDeleteUser(slotProps.data)" />
                 </template>

@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { InputMask } from 'primevue';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -81,9 +82,8 @@ const register = async () => {
                         </div>
 
                         <div class="field">
-                            <label for="indentifield" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Identificação</label>
-                            <InputText id="indentifield" type="text" v-model="formData.indentifield" />
-                            <Message size="small" severity="secondary" variant="simple">Se for aluno da UFC, digite sua matrícula. Se for público externo, digite seu CPF.</Message>
+                            <label for="" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">CPF</label>
+                            <InputMask id="indentifield" mask="999.999.999-99" type="text" v-model="formData.indentifield" />
                         </div>
 
                         <div class="field">
@@ -116,8 +116,7 @@ const register = async () => {
     transform: scale(1.6);
     margin-right: 1rem;
 }
-
-.pi-eye-slash {
+indentifield .pi-eye-slash {
     transform: scale(1.6);
     margin-right: 1rem;
 }

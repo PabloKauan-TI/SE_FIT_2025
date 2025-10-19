@@ -62,9 +62,6 @@ const Login = async () => {
                         <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
                         <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false" />
 
-                        <div class="flex items-center justify-between mt-2 mb-8 gap-8">
-                            <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
-                        </div>
                         <Button label="Sign In" class="w-full" @click="Login" />
                         <p class="mt-4 text-center">
                             Não possui uma conta?

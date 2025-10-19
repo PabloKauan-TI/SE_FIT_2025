@@ -25,7 +25,8 @@ const form = ref({
     limite: '',
     description: '',
     imagem: null,
-    imagePreview: ''
+    imagePreview: '',
+    horas: ''
 });
 
 const errors = ref({});
@@ -110,6 +111,7 @@ function onEdit(evt) {
     form.value.description = evt.description ?? '';
     form.value.imagem = null;
     form.value.imagePreview = evt.imagem ?? '';
+    form.value.horas = evt.horas ?? '';
     errors.value = {};
     eventDialog.value = true;
 }
@@ -162,6 +164,7 @@ async function submitForm() {
     payload.append('limite', form.value.limite);
     payload.append('location', form.value.location);
     payload.append('description', form.value.description);
+    payload.append('horas', form.value.horas);
 
     if (form.value.imagem instanceof File) {
         payload.append('imagem', form.value.imagem);
@@ -210,7 +213,8 @@ function resetForm() {
         location: '',
         description: '',
         imagem: null,
-        imagePreview: ''
+        imagePreview: '',
+        horas: ''
     };
     errors.value = {};
     if (fileInput.value) fileInput.value.value = null;
@@ -287,6 +291,7 @@ function onSearchInput() {
             </Column>
             <Column field="location" header="Local" sortable style="min-width: 14rem" />
             <Column field="limite" header="Limite" sortable style="min-width: 8rem" />
+            <Column field="horas" header="Carga Hóraria" sortable style="min-width: 8rem" />
             <Column header="Ações" style="min-width: 14rem" :exportable="false">
                 <template #body="slotProps">
                     <Button icon="pi pi-pencil" variant="outlined" rounded class="mr-2" @click="onEdit(slotProps.data)" />
@@ -361,9 +366,16 @@ function onSearchInput() {
                     <div class="col-12">
                         <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
                             <i class="pi pi-users text-gray-600"></i>
-                            limite
+                            Limite
                         </label>
                         <InputText v-model.trim="form.limite" class="w-full" />
+                    </div>
+                    <div class="col-12">
+                        <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700">
+                            <i class="pi pi-clock text-gray-600"></i>
+                            Carga Hóraria
+                        </label>
+                        <InputText v-model.trim="form.horas" class="w-full" />
                     </div>
 
                     <!-- Upload de Imagem -->

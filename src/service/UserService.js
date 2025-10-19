@@ -10,11 +10,20 @@ export default {
     perfil() {
         return api.get(`/perfil`);
     },
+    promover(id) {
+        return api.post(`/user/promover/${id}`);
+    },
+    rebaixar(id) {
+        return api.post(`/user/rebaixar/${id}`);
+    },
     create(data) {
         return api.post('/users', data);
     },
     update(id, data) {
         return api.put(`/users/${id}`, data);
+    },
+    updatePerfil(data) {
+        return api.put(`/perfil/update`, data);
     },
     delete(id) {
         return api.delete(`/users/${id}`);

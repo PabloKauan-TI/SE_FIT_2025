@@ -13,6 +13,47 @@ const selectedEvent = ref(null);
 const selectedEventVisible = ref(false);
 const toast = useToast();
 
+const parseToISO = (date) => {
+    // retorna uma string ISO "YYYY-MM-DDTHH:MM:SS" ou null
+    if (!date) return null;
+
+    // se já for Date ou timestamp numérico
+    if (date instanceof Date && !isNaN(date)) return date.toISOString();
+    if (typeof date === 'number') return new Date(date).toISOString();
+
+    // string: caso comum -> "DD/MM/YYYY" ou "DD/MM/YYYY HH:mm[:ss]"
+    if (typeof date === 'string') {
+        // normaliza separador de espaço para time
+        const parts = date.trim().split(' ');
+        const datePart = parts[0];
+        const timePart = parts[1] || '00:00:00';
+
+        // detecta formato DD/MM/YYYY
+        if (datePart.includes('/')) {
+            const [d, m, y] = datePart.split('/');
+            if (!d || !m || !y) return null;
+            // garante formato de tempo com segundos
+            let t = timePart;
+            const timeSegments = t.split(':');
+            if (timeSegments.length === 2) t = `${t}:00`;
+            // monta ISO
+            const iso = `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${t}`;
+            return iso;
+        }
+
+        // se já estiver em formato ISO ou "YYYY-MM-DD HH:MM:SS"
+        // substitui espaço por T se necessário
+        if (date.includes(' ')) {
+            return date.replace(' ', 'T');
+        }
+
+        // caso padrão (já ISO)
+        return date;
+    }
+
+    return null;
+};
+
 const normalizeEvent = (event) => {
     if (!event) return null;
 
@@ -25,15 +66,24 @@ const normalizeEvent = (event) => {
         if (rawImage.startsWith('http')) {
             imageUrl = rawImage;
         } else {
-            imageUrl = `${API_BASE_URL}/storage/${rawImage}`;
+            imageUrl = `${API_BASE_URL}/uploads/${rawImage}`;
         }
     }
+
+    // pega valor bruto da data vindo da API
+    const rawDate = event.data || event.dataEvento || event.date || null;
+    const iso = parseToISO(rawDate); // string ISO se possível
+    const dateObj = iso ? new Date(iso) : null; // Date válido ou null
+    const timestamp = dateObj && !isNaN(dateObj) ? dateObj.getTime() : null;
 
     return {
         id: event.id || Math.random(),
         nome: event.nome || event.name || 'Evento sem nome',
         description: event.description || 'Descrição não disponível',
-        data: event.data || event.dataEvento,
+        data: rawDate, // mantém o raw (para compatibilidade com seu formatDate)
+        dateISO: iso, // ISO string (padrão)
+        dateObj: dateObj, // objeto Date (pode ser usado direto)
+        timestamp: timestamp, // número para ordenar
         location: event.location || 'Local não definido',
         palestrante: event.palestrante || 'Palestrante não definido',
         limite: event.limite || 0,
@@ -46,36 +96,59 @@ const openDetails = (event) => {
     selectedEventVisible.value = true;
 };
 
-const formatDate = (date) => {
-    if (!date) return 'Data a definir';
-    try {
-        const [datePart, timePart] = date.split(' ');
-        const [day, month, year] = datePart.split('/');
-        const isoDateString = `${year}-${month}-${day}T${timePart}`;
-        const dateObject = new Date(isoDateString);
+const formatDate = (dateOrEvent) => {
+    // aceita: raw string (DD/MM/YYYY ...), ISO string, Date object, ou um evento (com dateObj)
+    let dateObject = null;
 
-        const formattedDate = dateObject.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
-        const formattedTime = dateObject.toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
+    if (!dateOrEvent) return 'Data a definir';
 
-        return `${formattedDate} às ${formattedTime}`;
-    } catch {
-        return 'Data inválida';
+    // se passou um evento (objeto com dateObj)
+    if (typeof dateOrEvent === 'object' && dateOrEvent !== null && dateOrEvent.dateObj) {
+        dateObject = dateOrEvent.dateObj;
+    } else if (dateOrEvent instanceof Date) {
+        dateObject = dateOrEvent;
+    } else if (typeof dateOrEvent === 'string') {
+        const iso = parseToISO(dateOrEvent);
+        dateObject = iso ? new Date(iso) : null;
+    } else if (typeof dateOrEvent === 'number') {
+        dateObject = new Date(dateOrEvent);
     }
+
+    if (!dateObject || isNaN(dateObject)) return 'Data inválida';
+
+    const formattedDate = dateObject.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+    });
+    const formattedTime = dateObject.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
+    return `${formattedDate} às ${formattedTime}`;
 };
 
 const inscribe = async (data) => {
     try {
         const response = await RegEvent.store(data);
-        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Incrição Efetuado!', life: 3000 });
-        allEvents();
+        if (response.data.alert) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Informação',
+                detail: response.data.alert, // mostra a mensagem vinda da API
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Inscrição efetuada!',
+                life: 3000
+            });
+            allEvents();
+        }
     } catch (err) {
         console.error('Erro ao deletar usuário:', err);
         toast.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível efetuar a incrição.', life: 3000 });
@@ -93,9 +166,14 @@ const allEvents = async () => {
         } else if (eventData && typeof eventData === 'object') {
             eventList = [normalizeEvent(eventData)].filter(Boolean);
         }
+
+        // Ordena usando timestamp (mais robusto)
+        eventList.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)); // do mais recente ao mais antigo
+
         events.value = eventList;
     } catch (error) {
         events.value = [];
+        console.error('Erro ao carregar eventos:', error);
     } finally {
         loading.value = false;
     }

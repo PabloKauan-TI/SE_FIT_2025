@@ -74,18 +74,75 @@ const cancelEditing = () => {
     });
 };
 
-const saveProfile = () => {
-    isSaving.value = true;
-    setTimeout(() => {
-        user.value = { ...editableUser.value };
-        isSaving.value = false;
+const saveProfile = async (userData) => {
+    try {
+        const response = await UserService.updatePerfil(userData);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: response.data?.message || 'Perfil atualizado com sucesso!',
+            life: 3000
+        });
+
         isEditing.value = false;
-        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Perfil atualizado com sucesso!', life: 3000 });
-    }, 1000);
+        fetchPerfil();
+    } catch (error) {
+        console.error('Erro ao alterar perfil:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Falha ao alterar perfil.',
+            life: 3000
+        });
+    }
 };
 
-const changePassword = () => {
-    toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Senha alterada!', life: 3000 });
+const changePassword = async () => {
+    try {
+        if (!passwordFields.value.current_password || !passwordFields.value.password || !passwordFields.value.password_confirmation) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Aviso',
+                detail: 'Preencha todos os campos de senha.',
+                life: 3000
+            });
+            return;
+        }
+
+        if (passwordFields.value.password !== passwordFields.value.password_confirmation) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Aviso',
+                detail: 'As senhas não conferem.',
+                life: 3000
+            });
+            return;
+        }
+
+        const response = await UserService.updatePerfil(passwordFields.value);
+
+        toast.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: response.data?.message || 'Senha alterada com sucesso!',
+            life: 3000
+        });
+
+        passwordFields.value = {
+            current_password: '',
+            password: '',
+            password_confirmation: ''
+        };
+    } catch (error) {
+        console.error('Erro ao alterar senha:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Falha ao alterar senha.',
+            life: 3000
+        });
+    }
 };
 </script>
 
@@ -131,7 +188,7 @@ const changePassword = () => {
                             <span class="text-lg text-surface-800 dark:text-surface-0">{{ user.escola }}</span>
                         </div>
                         <div class="field">
-                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">Indentificador</label>
+                            <label class="block text-sm font-medium text-surface-500 dark:text-surface-400 mb-2">CPF</label>
                             <span class="text-lg text-surface-800 dark:text-surface-0">{{ user.indentifield }}</span>
                         </div>
                     </div>
@@ -152,13 +209,13 @@ const changePassword = () => {
                                 <InputText id="escola" v-model="editableUser.escola" class="w-full mt-2" />
                             </div>
                             <div class="field">
-                                <label for="indentifield" class="font-semibold">Indentificador</label>
+                                <label for="indentifield" class="font-semibold">CPF</label>
                                 <InputText id="indentifield" v-model="editableUser.indentifield" class="w-full mt-2" />
                             </div>
                         </div>
                         <div class="flex justify-end mt-6 gap-2">
                             <Button label="Cancelar" severity="secondary" @click="cancelEditing" />
-                            <Button label="Salvar Alterações" icon="pi pi-check" @click="saveProfile" :loading="isSaving" />
+                            <Button label="Salvar Alterações" icon="pi pi-check" @click="saveProfile(editableUser)" :loading="isSaving" />
                         </div>
                     </div>
 
