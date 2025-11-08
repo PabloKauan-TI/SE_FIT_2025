@@ -127,7 +127,7 @@ const rebaixarUser = async (userToPromote) => {
     try {
         const id = userToPromote.id;
         await UserService.rebaixar(id);
-        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário Promovido!', life: 3000 });
+        toast.add({ severity: 'success', summary: 'Sucesso', detail: 'Usuário Rebaixado!', life: 3000 });
         fetchUsers();
     } catch (err) {
         console.error('Erro ao promover usuário:', err);

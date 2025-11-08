@@ -37,15 +37,11 @@ const userMenu = [
         items: [{ label: 'Ver Eventos', icon: 'pi pi-fw pi-eye', to: { name: 'mostrar-eventos' } }]
     },
     {
-        label: 'Tickets',
-        items: [{ label: 'Meus Tickets', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }]
-    },
-    {
         label: 'Certificados',
         items: [{ label: 'Ver Certificados', icon: 'pi pi-fw pi-eye', to: '/pages/certificados' }]
     },
     {
-        label: 'Conta',
+        label: 'Tickets',
         items: [{ label: 'Meus Ingressos', icon: 'pi pi-fw pi-ticket', to: { name: 'meus-ingressos' } }]
     }
 ];

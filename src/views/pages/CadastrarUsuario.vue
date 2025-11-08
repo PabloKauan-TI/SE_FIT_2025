@@ -27,10 +27,36 @@ const formData = ref({
 
 const isLoading = ref(false);
 
+const isValidCPF = (cpf) => {
+    cpf = cpf.replace(/[^\d]+/g, ''); // remove tudo que não for número
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+
+    let soma = 0,
+        resto;
+
+    // primeiro dígito verificador
+    for (let i = 1; i <= 9; i++) soma += parseInt(cpf.substring(i - 1, i)) * (11 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
+    // segundo dígito verificador
+    soma = 0;
+    for (let i = 1; i <= 10; i++) soma += parseInt(cpf.substring(i - 1, i)) * (12 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    return resto === parseInt(cpf.substring(10, 11));
+};
+
 const register = async () => {
     //validação de campos obrigatórios
     if (!formData.value.name || !formData.value.email || !formData.value.password) {
         toast.add({ severity: 'warn', summary: 'Atenção', detail: 'Nome, e-mail e senha são obrigatórios.', life: 3000 });
+        return;
+    }
+
+    if (!isValidCPF(formData.value.indentifield)) {
+        toast.add({ severity: 'warn', summary: 'Atenção', detail: 'Digite um CPF válido.', life: 3000 });
         return;
     }
 
